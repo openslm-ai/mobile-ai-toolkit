@@ -1,0 +1,96 @@
+{
+  "name": "@anivar/mobile-ai-toolkit",
+  "version": "1.0.0",
+  "description": "On-device AI for React Native. Zero cloud costs. One unified API.",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "lib/",
+    "src/",
+    "ios/",
+    "android/",
+    "README.md",
+    "SETUP.md",
+    "LICENSE",
+    "MobileAIToolkit.podspec"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --apply src/",
+    "format": "biome format --write src/",
+    "check": "biome check .",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "keywords": [
+    "ai",
+    "mobile",
+    "react-native",
+    "toolkit",
+    "machine-learning",
+    "openai",
+    "gemini",
+    "claude",
+    "llm",
+    "mobile-ai",
+    "artificial-intelligence",
+    "chat",
+    "vision",
+    "voice",
+    "text-analysis"
+  ],
+  "author": "Anivar Aravind <anivar@openslm.ai>",
+  "license": "MIT",
+  "homepage": "https://openslm.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openslm-ai/react-native-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openslm-ai/react-native-ai/issues"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-native": ">=0.80.0"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.19.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-native": "^0.81.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.4.4",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "npm@9.0.0+",
+  "codegenConfig": {
+    "name": "AIToolkitTurboModuleSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.openslm.mobileaitoolkit"
+    }
+  }
+}
