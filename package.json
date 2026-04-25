@@ -29,7 +29,7 @@
     "dev": "tsc --watch",
     "test": "jest",
     "lint": "biome check src/",
-    "lint:fix": "biome check --apply src/",
+    "lint:fix": "biome check --write src/",
     "format": "biome format --write src/",
     "check": "biome check .",
     "prepublishOnly": "npm run check && npm run build"
@@ -56,11 +56,12 @@
   "homepage": "https://openslm.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openslm-ai/react-native-ai.git"
+    "url": "https://github.com/openslm-ai/mobile-ai-toolkit.git"
   },
   "bugs": {
-    "url": "https://github.com/openslm-ai/react-native-ai/issues"
+    "url": "https://github.com/openslm-ai/mobile-ai-toolkit/issues"
   },
+  "funding": "https://github.com/sponsors/anivar",
   "peerDependencies": {
     "react": ">=19.0.0",
     "react-native": ">=0.80.0"
@@ -69,11 +70,9 @@
     "@react-native-async-storage/async-storage": "^1.19.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "@types/jest": "^29.0.0",
     "@types/react": "^19.0.0",
-    "@types/react-native": "^0.81.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.0.0",
     "jest": "^29.0.0",
     "ts-jest": "^29.4.4",
     "typescript": "^5.0.0"
@@ -84,7 +83,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "npm@9.0.0+",
+  "packageManager": "npm@10.9.0",
   "codegenConfig": {
     "name": "AIToolkitTurboModuleSpec",
     "type": "modules",
