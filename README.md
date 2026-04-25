@@ -1,11 +1,42 @@
 # @anivar/mobile-ai-toolkit
 
-On-device AI for React Native. One unified TypeScript API; each method is a thin TurboModule binding to a documented platform framework — Apple Foundation Models / Vision / NaturalLanguage / Speech on iOS, Google ML Kit (incl. ML Kit GenAI on AICore-enabled devices) on Android. Nothing leaves the device, nothing is mocked.
+> **On-device AI for React Native.** One unified TypeScript API; each method is a thin TurboModule binding to a documented platform framework — Apple Foundation Models / Vision / NaturalLanguage / Speech on iOS, Google ML Kit (incl. ML Kit GenAI on AICore-enabled devices) on Android. Nothing leaves the device, nothing is mocked.
 
-[![npm version](https://img.shields.io/npm/v/@anivar/mobile-ai-toolkit.svg?style=flat-square)](https://www.npmjs.com/package/@anivar/mobile-ai-toolkit)
-[![CI](https://img.shields.io/github/actions/workflow/status/openslm-ai/mobile-ai-toolkit/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/openslm-ai/mobile-ai-toolkit/actions/workflows/ci.yml)
-[![Provenance](https://img.shields.io/badge/npm-provenance-success?style=flat-square&logo=npm)](https://docs.npmjs.com/generating-provenance-statements)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+<p>
+  <a href="https://www.npmjs.com/package/@anivar/mobile-ai-toolkit"><img alt="npm (latest)" src="https://img.shields.io/npm/v/@anivar/mobile-ai-toolkit/latest.svg?style=flat-square&label=npm%20latest&color=cb3837&logo=npm"></a>
+  <a href="https://www.npmjs.com/package/@anivar/mobile-ai-toolkit?activeTab=versions"><img alt="npm (next)" src="https://img.shields.io/npm/v/@anivar/mobile-ai-toolkit/next.svg?style=flat-square&label=npm%20next&color=ff8800&logo=npm"></a>
+  <a href="https://www.npmjs.com/package/@anivar/mobile-ai-toolkit"><img alt="downloads" src="https://img.shields.io/npm/dm/@anivar/mobile-ai-toolkit.svg?style=flat-square&color=0aa"></a>
+  <a href="https://bundlephobia.com/package/@anivar/mobile-ai-toolkit"><img alt="bundle size" src="https://img.shields.io/bundlephobia/minzip/@anivar/mobile-ai-toolkit?style=flat-square&label=min%2Bgzip"></a>
+  <a href="https://packagephobia.com/result?p=@anivar/mobile-ai-toolkit"><img alt="install size" src="https://badgen.net/packagephobia/install/@anivar/mobile-ai-toolkit?style=flat-square"></a>
+</p>
+
+<p>
+  <a href="https://github.com/openslm-ai/mobile-ai-toolkit/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/openslm-ai/mobile-ai-toolkit/ci.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white"></a>
+  <a href="https://github.com/openslm-ai/mobile-ai-toolkit/actions/workflows/release.yml"><img alt="Release" src="https://img.shields.io/github/actions/workflow/status/openslm-ai/mobile-ai-toolkit/release.yml?style=flat-square&label=release&logo=githubactions&logoColor=white"></a>
+  <a href="https://docs.npmjs.com/generating-provenance-statements"><img alt="npm provenance" src="https://img.shields.io/badge/npm-provenance-success?style=flat-square&logo=npm"></a>
+  <a href="https://github.com/openslm-ai/mobile-ai-toolkit/security/policy"><img alt="security policy" src="https://img.shields.io/badge/security-policy-informational?style=flat-square&logo=keybase"></a>
+  <a href="https://www.npmjs.com/package/@anivar/mobile-ai-toolkit"><img alt="types: included" src="https://img.shields.io/npm/types/@anivar/mobile-ai-toolkit?style=flat-square&logo=typescript&logoColor=white"></a>
+</p>
+
+<p>
+  <img alt="iOS 13+" src="https://img.shields.io/badge/iOS-13%2B-000?style=flat-square&logo=apple&logoColor=white">
+  <img alt="Android API 26+" src="https://img.shields.io/badge/Android-API%2026%2B-3DDC84?style=flat-square&logo=android&logoColor=white">
+  <img alt="React Native 0.80+" src="https://img.shields.io/badge/React%20Native-%E2%89%A50.80-61dafb?style=flat-square&logo=react">
+  <img alt="React 19+" src="https://img.shields.io/badge/React-%E2%89%A519-61dafb?style=flat-square&logo=react">
+  <img alt="New Architecture (TurboModule)" src="https://img.shields.io/badge/New%20Architecture-TurboModule-7c3aed?style=flat-square">
+  <img alt="On-device" src="https://img.shields.io/badge/runs-on--device-22c55e?style=flat-square">
+</p>
+
+<p>
+  <a href="https://github.com/openslm-ai/mobile-ai-toolkit/stargazers"><img alt="stars" src="https://img.shields.io/github/stars/openslm-ai/mobile-ai-toolkit?style=flat-square&logo=github"></a>
+  <a href="https://github.com/openslm-ai/mobile-ai-toolkit/issues"><img alt="open issues" src="https://img.shields.io/github/issues/openslm-ai/mobile-ai-toolkit?style=flat-square&logo=github"></a>
+  <a href="https://github.com/openslm-ai/mobile-ai-toolkit/pulls"><img alt="open PRs" src="https://img.shields.io/github/issues-pr/openslm-ai/mobile-ai-toolkit?style=flat-square&logo=github"></a>
+  <a href="https://github.com/openslm-ai/mobile-ai-toolkit/commits/main"><img alt="last commit" src="https://img.shields.io/github/last-commit/openslm-ai/mobile-ai-toolkit?style=flat-square&logo=github"></a>
+  <a href="https://github.com/sponsors/anivar"><img alt="sponsor" src="https://img.shields.io/github/sponsors/anivar?style=flat-square&logo=githubsponsors&color=ea4aaa"></a>
+  <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square"></a>
+</p>
+
+---
 
 > ## ⚠️ 2.1 Release-Candidate Disclaimer
 >
@@ -25,16 +56,25 @@ A unified surface that hides the iOS/Android split *without* lying about it. Whe
 
 ## Install
 
+Stable (verified surface — recommended for production):
+
 ```bash
 npm install @anivar/mobile-ai-toolkit
 cd ios && pod install
 ```
 
-Requires React Native 0.80+ (new architecture / TurboModules), react 19+. Minimum iOS 13, Android API 26.
+Release candidate (Apple Foundation Models bridge — see disclaimer):
+
+```bash
+npm install @anivar/mobile-ai-toolkit@next
+cd ios && pod install
+```
+
+Requires React Native 0.80+ (new architecture / TurboModules), React 19+. Minimum iOS 13, Android API 26.
 
 ## Capability matrix
 
-Every method below maps to a real platform call. ✅ = on-device. ⚠️ = on-device when supported by OEM/locale. ❌ = not implemented on that platform; the call rejects with `UNSUPPORTED_PLATFORM`.
+Every method below maps to a real platform call. ✅ = on-device. 🧪 = on-device but unverified on real hardware (see disclaimer). ⚠️ = on-device when supported by OEM/locale. ❌ = not implemented on that platform; the call rejects with `UNSUPPORTED_PLATFORM`.
 
 | Method | iOS | Android |
 |---|---|---|
@@ -72,6 +112,7 @@ import {
   summarizeText,
   rewriteText,
   generateText,
+  chat,
   smartReplies,
   translateText,
   transcribeAudioFile,
@@ -98,6 +139,12 @@ if (caps.features.summarize) {
 }
 if (caps.features.generate) {
   const reply = await generateText('Write a polite decline.', { maxOutputTokens: 80 });
+}
+if (caps.features.chat) {
+  const answer = await chat([
+    { role: 'system', content: 'You are terse.' },
+    { role: 'user', content: 'Why is the sky blue?' },
+  ]);
 }
 
 // 4. Platform-specific calls reject cleanly when unsupported.
@@ -182,6 +229,12 @@ We also welcome:
 - **v2.2** — Streaming variants of `generateText` / `summarizeText` / `rewriteText` / `chat` (token callbacks) on Android via the Prompt API streaming surface.
 - **v2.2** — Apple Translation framework bridge for `translateText` on iOS 18+ via SwiftUI host integration.
 
+## Supply chain & provenance
+
+- Every release on npm is published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) — the `Provenance` badge on the npm page links to the exact GitHub Actions run that built and signed the tarball.
+- The package has zero runtime dependencies. `peerDependencies` are `react ≥19` and `react-native ≥0.80`.
+- Releases are tagged on GitHub and built by the [release workflow](.github/workflows/release.yml) — the workflow file is the single source of truth for what gets published.
+
 ## License
 
-MIT © Anivar Aravind
+MIT © [Anivar Aravind](https://github.com/anivar)
