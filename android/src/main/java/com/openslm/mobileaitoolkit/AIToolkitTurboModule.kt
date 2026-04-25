@@ -96,6 +96,7 @@ class AIToolkitTurboModule(private val reactContext: ReactApplicationContext) :
                 putBoolean("summarize", hasGenAI)
                 putBoolean("rewrite", hasGenAI)
                 putBoolean("generate", hasGenAI)
+                putBoolean("chat", hasGenAI)
                 putBoolean("smartReplies", true)
                 putBoolean("extractEntities", true)
                 putBoolean("embedText", false)
@@ -586,6 +587,46 @@ class AIToolkitTurboModule(private val reactContext: ReactApplicationContext) :
         } catch (e: Throwable) {
             promise.reject("FEATURE_UNAVAILABLE", "ML Kit GenAI Prompt API is not installed in this build", e)
         }
+    }
+
+    // ---- Generative: chat (multi-turn, single-shot reply) ----
+
+    override fun chat(messages: ReadableArray, options: ReadableMap, promise: Promise) {
+        if (messages.size() == 0) {
+            promise.reject("INVALID_INPUT", "chat() requires at least one message.")
+            return
+        }
+        // Flatten chat messages into a single tagged prompt — ML Kit GenAI's
+        // PromptApi is single-shot, so multi-turn history is replayed as text.
+        val instructions = StringBuilder()
+        val turns = StringBuilder()
+        for (i in 0 until messages.size()) {
+            val m = messages.getMap(i) ?: continue
+            val role = m.getString("role") ?: continue
+            val content = m.getString("content") ?: continue
+            if (role == "system") {
+                if (instructions.isNotEmpty()) instructions.append('\n')
+                instructions.append(content)
+            } else {
+                turns.append(role.replaceFirstChar { it.uppercaseChar() })
+                turns.append(": ")
+                turns.append(content)
+                turns.append('\n')
+            }
+        }
+        if (turns.isEmpty()) {
+            promise.reject("INVALID_INPUT", "chat() requires at least one non-system message.")
+            return
+        }
+        val prompt = buildString {
+            if (instructions.isNotEmpty()) {
+                append(instructions)
+                append("\n\n")
+            }
+            append(turns)
+            append("Assistant:")
+        }
+        generateText(prompt, options, promise)
     }
 
     // ---- Vision (extras) ----

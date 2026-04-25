@@ -1,11 +1,23 @@
 # @anivar/mobile-ai-toolkit
 
-On-device AI for React Native. One unified TypeScript API; each method is a thin TurboModule binding to a documented platform framework — Apple Vision / NaturalLanguage / Speech on iOS, Google ML Kit (incl. ML Kit GenAI on AICore-enabled devices) on Android. Nothing leaves the device, nothing is mocked.
+On-device AI for React Native. One unified TypeScript API; each method is a thin TurboModule binding to a documented platform framework — Apple Foundation Models / Vision / NaturalLanguage / Speech on iOS, Google ML Kit (incl. ML Kit GenAI on AICore-enabled devices) on Android. Nothing leaves the device, nothing is mocked.
 
 [![npm version](https://img.shields.io/npm/v/@anivar/mobile-ai-toolkit.svg?style=flat-square)](https://www.npmjs.com/package/@anivar/mobile-ai-toolkit)
 [![CI](https://img.shields.io/github/actions/workflow/status/openslm-ai/mobile-ai-toolkit/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/openslm-ai/mobile-ai-toolkit/actions/workflows/ci.yml)
 [![Provenance](https://img.shields.io/badge/npm-provenance-success?style=flat-square&logo=npm)](https://docs.npmjs.com/generating-provenance-statements)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
+> ## ⚠️ 2.1 Release-Candidate Disclaimer
+>
+> **The iOS Foundation Models bridge in 2.1.x has not been verified on real Apple Intelligence hardware.** The maintainer does not currently have access to an iPhone 15 Pro / 16 / 17 series device, an Apple Developer account, or a paid macOS CI runner. The Swift code is written against publicly documented Apple API but has only been compile-checked on Linux via the JS / TypeScript / Biome surface — there is no proof the bridge runs end-to-end against the real `SystemLanguageModel`.
+>
+> **What this means for you:**
+> - 2.1.0-rc.x ships under the `next` dist-tag, **not `latest`**. Default `npm install` still pulls the verified 2.0.
+> - On Android (ML Kit + ML Kit GenAI), 2.1 is functionally identical to 2.0 — same verified surface.
+> - On iOS ≤ 25, 2.1 behaves exactly like 2.0 (rejects generative methods).
+> - On iOS 26+ with Apple Intelligence enabled, the new `summarizeText` / `rewriteText` / `generateText` / `chat()` methods *should* route to Foundation Models. They have not been observed doing so on real hardware.
+>
+> **Help wanted — see [Contributors needed](#contributors-needed-real-device-verification) below.** If you own an Apple-Intelligence-eligible device and want to help cut a verified 2.1.0 GA, even a single bug report would unblock the release.
 
 ## Why
 
@@ -37,11 +49,12 @@ Every method below maps to a real platform call. ✅ = on-device. ⚠️ = on-de
 | `describeImage(b64)` | ❌ | ✅ ML Kit GenAI `ImageDescription` *(Beta, AICore)* |
 | `segmentPerson(b64)` | ✅ `VNGeneratePersonSegmentationRequest` (iOS 15+) | ✅ ML Kit `SelfieSegmentation` |
 | `proofreadText(text)` | ✅ `UITextChecker` *(spelling only)* | ✅ ML Kit GenAI `Proofreader` *(Beta, AICore)* |
-| `summarizeText(text, fmt)` | ❌ — Foundation Models bridge in v2.1 | ✅ ML Kit GenAI `Summarizer` *(Beta, AICore)* |
-| `rewriteText(text, style)` | ❌ — Foundation Models bridge in v2.1 | ✅ ML Kit GenAI `Rewriter` *(Beta, AICore)* |
-| `generateText(prompt, opts)` | ❌ — Foundation Models bridge in v2.1 | ✅ ML Kit GenAI `Prompt` API *(Beta, Gemini Nano / Gemma 4 via AICore)* |
+| `summarizeText(text, fmt)` | 🧪 Foundation Models *(iOS 26+, Apple Intelligence — unverified, see disclaimer)* | ✅ ML Kit GenAI `Summarizer` *(Beta, AICore)* |
+| `rewriteText(text, style)` | 🧪 Foundation Models *(iOS 26+, unverified)* | ✅ ML Kit GenAI `Rewriter` *(Beta, AICore)* |
+| `generateText(prompt, opts)` | 🧪 Foundation Models *(iOS 26+, unverified)* | ✅ ML Kit GenAI `Prompt` API *(Beta, Gemini Nano / Gemma 4 via AICore)* |
+| `chat(messages, opts)` | 🧪 Foundation Models *(iOS 26+, unverified)* | ✅ ML Kit GenAI `Prompt` API (history flattened to single-shot prompt) |
 | `smartReplies(messages)` | ❌ — no public iOS equivalent | ✅ ML Kit `SmartReply` (GA) |
-| `translateText(text, src, tgt)` | ❌ — Translation framework bridge in v2.1 | ✅ ML Kit `Translator` (GA, downloads language pack on first use) |
+| `translateText(text, src, tgt)` | ❌ — Translation framework bridge tracked for v2.2 | ✅ ML Kit `Translator` (GA, downloads language pack on first use) |
 | `transcribeAudioFile(path, opts)` | ✅ `SFSpeechRecognizer` with `requiresOnDeviceRecognition = true` | ⚠️ `SpeechRecognizer` with `EXTRA_PREFER_OFFLINE` (OEM-dependent) |
 
 `getDeviceCapabilities().features` returns a `Record<MethodName, boolean>` map so you can show or hide UI without try/catch.
@@ -111,24 +124,63 @@ enablePrivateMode(true);
 
 ## Device-class gotchas
 
-- **ML Kit GenAI** (`summarizeText`, `rewriteText`, `proofreadText`, `describeImage`, `generateText` on Android) runs only on AICore-enabled devices: Pixel 9+, Samsung S25+, and select 2024–2026 flagships from Xiaomi / OPPO / Honor with locked bootloaders. Pixel 10+ uses Gemma 4 via AICore. On unsupported devices these methods reject with `FEATURE_UNAVAILABLE` — always check `caps.features.<method>` first.
+- **iOS Foundation Models** (`summarizeText`, `rewriteText`, `generateText`, `chat` on iOS) require iOS 26+ on Apple-Intelligence-eligible hardware (iPhone 15 Pro / Pro Max, every iPhone 16 / 17, M-series iPad / Mac) **and** Apple Intelligence enabled in Settings. On any other configuration these methods reject `FEATURE_UNAVAILABLE` with a precise reason from `SystemLanguageModel.availability`. **The bridge itself is unverified — see the disclaimer at the top.**
+- **ML Kit GenAI** (`summarizeText`, `rewriteText`, `proofreadText`, `describeImage`, `generateText`, `chat` on Android) runs only on AICore-enabled devices: Pixel 9+, Samsung S25+, and select 2024–2026 flagships from Xiaomi / OPPO / Honor with locked bootloaders. Pixel 10+ uses Gemma 4 via AICore. On unsupported devices these methods reject with `FEATURE_UNAVAILABLE` — always check `caps.features.<method>` first.
 - **iOS on-device speech** (`SFSpeechRecognizer.supportsOnDeviceRecognition`) returns true on most modern devices but can be false for locales whose speech model isn't installed.
 - **iOS proofread** uses `UITextChecker` and is spelling-only; the Apple Intelligence Writing Tools rewrite UI has no programmatic invocation API.
 - **iOS embeddings** require iOS 17+ and a model loaded for the script of the input (Latin / CJK / Cyrillic / etc.); unsupported scripts reject with `FEATURE_UNAVAILABLE`.
+- **`chat()` is single-shot.** Both platforms flatten the message list into one prompt and run a single inference pass — neither vendor exposes a stable persistent-session API across the bridge yet. State lives in *your* JS, not in the native module.
 
 ## What's NOT in this package
 
-- **No multi-turn `chat()` session.** ML Kit GenAI's Prompt API does not expose persistent sessions across the JNI boundary in a stable form yet; Apple Foundation Models is Swift-only and needs a bridging layer. `generateText()` is single-shot for now.
-- **No iOS generative methods.** `summarizeText` / `rewriteText` / `generateText` reject `UNSUPPORTED_PLATFORM` on iOS until the v2.1 Foundation Models bridge lands.
+- **No streaming token callbacks.** Tracked for v2.2 on Android via the Prompt API streaming surface.
+- **No iOS translation.** Apple's Translation framework requires SwiftUI host integration; bridge tracked for v2.2.
+- **No iOS image description.** Apple's on-device foundation model is text-only; no public `describeImage` equivalent exists. Use `labelImage()` / `analyzeImage()` for visual data.
 - **No intent classification.** No public on-device intent-classifier API on either platform that beats a hardcoded keyword matcher.
 - **No iOS Writing Tools rewrite.** The system UI can be attached to a `UITextView`, but it has no programmatic API.
 - **No cloud fallback.** Out of scope; call your own backend from JS if you need it.
 
+## Contributors needed (real-device verification)
+
+The 2.1 release-candidate ships an unverified Foundation Models bridge because the maintainer doesn't have access to the hardware to test it. **You can help cut a verified 2.1.0 GA in under 10 minutes if you own any of:**
+
+- iPhone 15 Pro / 15 Pro Max
+- any iPhone 16 / 16 Plus / 16 Pro / 16 Pro Max
+- any iPhone 17 / 17 Pro / 17 Pro Max
+- M1+ iPad or any Apple-silicon Mac, on macOS 26+ with Apple Intelligence enabled
+
+**What we need:**
+
+1. Install `@anivar/mobile-ai-toolkit@next` in any RN 0.80+ app on the device above.
+2. Confirm Apple Intelligence is enabled in **Settings → Apple Intelligence & Siri**.
+3. Run this snippet:
+   ```ts
+   import { getDeviceCapabilities, generateText, summarizeText, chat } from '@anivar/mobile-ai-toolkit';
+   const caps = await getDeviceCapabilities();
+   console.log('hasAppleIntelligence:', caps.hasAppleIntelligence);
+   console.log('features.generate:', caps.features.generate);
+   console.log(await generateText('Write a one-line haiku about TurboModules.', { maxOutputTokens: 60 }));
+   console.log(await summarizeText('React Native bridges JS to native code via TurboModules using JSI.', 'one-bullet'));
+   console.log(await chat([
+     { role: 'system', content: 'You are terse.' },
+     { role: 'user', content: 'Why is the sky blue?' },
+   ]));
+   ```
+4. Open an issue at <https://github.com/openslm-ai/mobile-ai-toolkit/issues> with the device model, iOS version, and the four output lines (or the full error stack if it threw).
+
+That's it. Even a single confirmation flips 2.1 from RC to GA. Bug reports are equally valuable — if the bridge is wrong I'd rather know now than have it sit broken for months.
+
+We also welcome:
+
+- **Anyone with a paid macOS CI minute budget** — adding a workflow that does `xcodebuild build -scheme MobileAIToolkitExample -destination "platform=iOS Simulator,OS=26.0"` would catch compile-time regressions on every PR.
+- **iOS / Swift devs** willing to review `ios/AIToolkitFoundationModels.swift` for correctness against the documented Foundation Models API.
+- **Android / ML Kit GenAI users** with a Pixel 9+ or S25+ — bug reports against the Beta APIs are useful too.
+
 ## Roadmap
 
-- **v2.1** — Swift bridging layer for **Apple Foundation Models** (iOS 26+, A17 Pro+) backing `summarizeText`, `rewriteText`, `generateText`, plus a new multi-turn `chat()`.
-- **v2.1** — **Apple Translation** framework bridge for `translateText` on iOS 17.4+.
-- **v2.2** — Streaming variants of `generateText` / `summarizeText` / `rewriteText` (token callbacks) on Android via the Prompt API streaming surface.
+- **v2.1.0 GA** — gated on at least one community confirmation that the Foundation Models bridge works end-to-end on real hardware. Until then, 2.1.x stays under the `next` dist-tag.
+- **v2.2** — Streaming variants of `generateText` / `summarizeText` / `rewriteText` / `chat` (token callbacks) on Android via the Prompt API streaming surface.
+- **v2.2** — Apple Translation framework bridge for `translateText` on iOS 18+ via SwiftUI host integration.
 
 ## License
 
