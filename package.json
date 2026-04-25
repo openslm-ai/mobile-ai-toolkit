@@ -1,6 +1,6 @@
 {
   "name": "@anivar/mobile-ai-toolkit",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "On-device AI for React Native. Zero cloud costs. One unified API.",
   "main": "lib/index.js",
   "module": "lib/index.js",
