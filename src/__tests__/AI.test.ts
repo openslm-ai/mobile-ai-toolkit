@@ -16,6 +16,8 @@ jest.mock('../specs/NativeAIToolkitSpec', () => ({
         proofread: true,
         summarize: false,
         rewrite: false,
+        generate: false,
+        chat: false,
         smartReplies: false,
         extractEntities: true,
         translate: false,
@@ -40,6 +42,12 @@ jest.mock('../specs/NativeAIToolkitSpec', () => ({
     rewriteText: jest.fn(async () => {
       throw new Error('UNSUPPORTED_PLATFORM');
     }),
+    generateText: jest.fn(async () => {
+      throw new Error('FEATURE_UNAVAILABLE');
+    }),
+    chat: jest.fn(async () => {
+      throw new Error('FEATURE_UNAVAILABLE');
+    }),
     smartReplies: jest.fn(async () => []),
     translateText: jest.fn(async () => {
       throw new Error('UNSUPPORTED_PLATFORM');
@@ -57,8 +65,10 @@ jest.mock('../specs/NativeAIToolkitSpec', () => ({
 import {
   analyzeImage,
   analyzeText,
+  chat,
   enablePrivateMode,
   extractEntities,
+  generateText,
   getDeviceCapabilities,
   identifyLanguage,
   isPrivateModeEnabled,
@@ -117,6 +127,15 @@ describe('mobile-ai-toolkit', () => {
     await expect(summarizeText('long text', 'bullets')).rejects.toThrow();
     await expect(rewriteText('hello', 'professional')).rejects.toThrow();
     await expect(translateText('hello', 'en', 'es')).rejects.toThrow();
+  });
+
+  test('generateText / chat exist and reject when unavailable on the mock device', async () => {
+    expect(typeof generateText).toBe('function');
+    expect(typeof chat).toBe('function');
+    await expect(generateText('hi', { maxOutputTokens: 10 })).rejects.toThrow();
+    await expect(
+      chat([{ role: 'user', content: 'hi' }], { maxOutputTokens: 10 })
+    ).rejects.toThrow();
   });
 
   test('smartReplies returns array', async () => {

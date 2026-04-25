@@ -10,6 +10,11 @@
 #import "AIToolkitTurboModuleSpec.h"
 #endif
 
+#if __has_include("MobileAIToolkit-Swift.h")
+#import "MobileAIToolkit-Swift.h"
+#define AI_HAS_FOUNDATION_BRIDGE 1
+#endif
+
 @implementation AIToolkitTurboModule
 
 RCT_EXPORT_MODULE()
@@ -34,9 +39,17 @@ RCT_EXPORT_METHOD(getDeviceCapabilities:(RCTPromiseResolveBlock)resolve
     capabilities[@"hasMLKitGenAI"] = @NO;
     capabilities[@"hasGeminiNano"] = @NO;
 
-    BOOL hasAppleIntelligence = NO;
+    BOOL hasFoundationModels = NO;
+#if AI_HAS_FOUNDATION_BRIDGE
+    if (@available(iOS 26.0, *)) {
+        hasFoundationModels = [AIToolkitFoundationModels isAvailable];
+    }
+#endif
+    BOOL hasAppleIntelligence = hasFoundationModels;
     if (@available(iOS 18.1, *)) {
-        hasAppleIntelligence = NSClassFromString(@"WTWritingToolsCoordinator") != nil;
+        if (!hasAppleIntelligence) {
+            hasAppleIntelligence = NSClassFromString(@"WTWritingToolsCoordinator") != nil;
+        }
     }
     capabilities[@"hasAppleIntelligence"] = @(hasAppleIntelligence);
 
@@ -61,9 +74,10 @@ RCT_EXPORT_METHOD(getDeviceCapabilities:(RCTPromiseResolveBlock)resolve
         @"analyzeText": @YES,
         @"analyzeImage": @YES,
         @"proofread": @YES,
-        @"summarize": @NO,
-        @"rewrite": @NO,
-        @"generate": @NO,
+        @"summarize": @(hasFoundationModels),
+        @"rewrite": @(hasFoundationModels),
+        @"generate": @(hasFoundationModels),
+        @"chat": @(hasFoundationModels),
         @"smartReplies": @NO,
         @"extractEntities": @YES,
         @"embedText": @(hasContextualEmbedding),
@@ -325,16 +339,51 @@ RCT_EXPORT_METHOD(proofreadText:(NSString *)text
     });
 }
 
-#pragma mark - Generative (Android-only via ML Kit GenAI)
+#pragma mark - Generative
+
+// On iOS 26+ with Apple-Intelligence-eligible hardware these methods route to
+// the Foundation Models bridge (AIToolkitFoundationModels.swift). Otherwise
+// they reject FEATURE_UNAVAILABLE / UNSUPPORTED_PLATFORM with a precise reason.
+
+static BOOL AI_FoundationModelsAvailable(void) {
+#if AI_HAS_FOUNDATION_BRIDGE
+    if (@available(iOS 26.0, *)) {
+        return [AIToolkitFoundationModels isAvailable];
+    }
+#endif
+    return NO;
+}
+
+static NSString *AI_FoundationModelsUnavailableReason(void) {
+#if AI_HAS_FOUNDATION_BRIDGE
+    if (@available(iOS 26.0, *)) {
+        return [AIToolkitFoundationModels unavailableReason];
+    }
+#endif
+    return @"Foundation Models requires iOS 26 and Apple Intelligence.";
+}
 
 RCT_EXPORT_METHOD(summarizeText:(NSString *)text
                  format:(NSString *)format
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
-    reject(@"UNSUPPORTED_PLATFORM",
-           @"On-device summarization is not yet available on iOS. Apple Foundation Models support is planned for v2.1.",
-           nil);
+    if (text.length == 0) {
+        reject(@"INVALID_INPUT", @"Text cannot be empty", nil);
+        return;
+    }
+#if AI_HAS_FOUNDATION_BRIDGE
+    if (@available(iOS 26.0, *)) {
+        if ([AIToolkitFoundationModels isAvailable]) {
+            [AIToolkitFoundationModels summarizeWithText:text
+                                                  format:(format ?: @"bullets")
+                                                resolver:resolve
+                                                rejecter:reject];
+            return;
+        }
+    }
+#endif
+    reject(@"FEATURE_UNAVAILABLE", AI_FoundationModelsUnavailableReason(), nil);
 }
 
 RCT_EXPORT_METHOD(rewriteText:(NSString *)text
@@ -342,9 +391,22 @@ RCT_EXPORT_METHOD(rewriteText:(NSString *)text
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
-    reject(@"UNSUPPORTED_PLATFORM",
-           @"On-device text rewriting is not yet available on iOS. Apple Foundation Models support is planned for v2.1.",
-           nil);
+    if (text.length == 0) {
+        reject(@"INVALID_INPUT", @"Text cannot be empty", nil);
+        return;
+    }
+#if AI_HAS_FOUNDATION_BRIDGE
+    if (@available(iOS 26.0, *)) {
+        if ([AIToolkitFoundationModels isAvailable]) {
+            [AIToolkitFoundationModels rewriteWithText:text
+                                                 style:(style ?: @"rephrase")
+                                              resolver:resolve
+                                              rejecter:reject];
+            return;
+        }
+    }
+#endif
+    reject(@"FEATURE_UNAVAILABLE", AI_FoundationModelsUnavailableReason(), nil);
 }
 
 RCT_EXPORT_METHOD(smartReplies:(NSArray *)messages
@@ -363,7 +425,7 @@ RCT_EXPORT_METHOD(translateText:(NSString *)text
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     reject(@"UNSUPPORTED_PLATFORM",
-           @"On-device translation requires iOS Translation framework Swift bridge (planned for v2.1). Use Android or call a cloud translation service from JS.",
+           @"iOS Translation framework requires SwiftUI host integration; tracked for v2.2. On Android use ML Kit Translator.",
            nil);
 }
 
@@ -372,9 +434,51 @@ RCT_EXPORT_METHOD(generateText:(NSString *)prompt
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
-    reject(@"UNSUPPORTED_PLATFORM",
-           @"Generic on-device LLM prompting requires Apple Foundation Models (Swift-only, iOS 26+, A17 Pro+). Bridge planned for v2.1.",
-           nil);
+    if (prompt.length == 0) {
+        reject(@"INVALID_INPUT", @"Prompt cannot be empty", nil);
+        return;
+    }
+#if AI_HAS_FOUNDATION_BRIDGE
+    if (@available(iOS 26.0, *)) {
+        if ([AIToolkitFoundationModels isAvailable]) {
+            NSNumber *maxTokens = options[@"maxOutputTokens"];
+            NSNumber *temperature = options[@"temperature"];
+            [AIToolkitFoundationModels generateWithPrompt:prompt
+                                          maxOutputTokens:maxTokens
+                                              temperature:temperature
+                                                 resolver:resolve
+                                                 rejecter:reject];
+            return;
+        }
+    }
+#endif
+    reject(@"FEATURE_UNAVAILABLE", AI_FoundationModelsUnavailableReason(), nil);
+}
+
+RCT_EXPORT_METHOD(chat:(NSArray *)messages
+                 options:(NSDictionary *)options
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    if (messages.count == 0) {
+        reject(@"INVALID_INPUT", @"chat() requires at least one message.", nil);
+        return;
+    }
+#if AI_HAS_FOUNDATION_BRIDGE
+    if (@available(iOS 26.0, *)) {
+        if ([AIToolkitFoundationModels isAvailable]) {
+            NSNumber *maxTokens = options[@"maxOutputTokens"];
+            NSNumber *temperature = options[@"temperature"];
+            [AIToolkitFoundationModels chatWithMessages:messages
+                                        maxOutputTokens:maxTokens
+                                            temperature:temperature
+                                               resolver:resolve
+                                               rejecter:reject];
+            return;
+        }
+    }
+#endif
+    reject(@"FEATURE_UNAVAILABLE", AI_FoundationModelsUnavailableReason(), nil);
 }
 
 RCT_EXPORT_METHOD(describeImage:(NSString *)imageBase64
@@ -382,7 +486,7 @@ RCT_EXPORT_METHOD(describeImage:(NSString *)imageBase64
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     reject(@"UNSUPPORTED_PLATFORM",
-           @"On-device image description requires Foundation Models multimodal API (Swift-only, iOS 26+). Bridge planned for v2.1.",
+           @"Apple Intelligence's on-device foundation model is text-only; no public iOS image-description API. Use labelImage() / scanBarcodes() / analyzeImage() for visual data.",
            nil);
 }
 

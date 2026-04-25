@@ -17,6 +17,7 @@ export interface DeviceCapabilities {
     summarize: boolean;
     rewrite: boolean;
     generate: boolean;
+    chat: boolean;
     smartReplies: boolean;
     extractEntities: boolean;
     embedText: boolean;
@@ -27,6 +28,11 @@ export interface DeviceCapabilities {
     describeImage: boolean;
     segmentPerson: boolean;
   };
+}
+
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
 }
 
 export interface TextAnalysisOptions {
@@ -148,6 +154,7 @@ export interface Spec extends TurboModule {
   summarizeText(text: string, format: string): Promise<string>;
   rewriteText(text: string, style: string): Promise<string>;
   generateText(prompt: string, options: GenerationOptions): Promise<string>;
+  chat(messages: ChatMessage[], options: GenerationOptions): Promise<string>;
   smartReplies(messages: SmartReplyMessage[]): Promise<string[]>;
   translateText(text: string, sourceLang: string, targetLang: string): Promise<string>;
 

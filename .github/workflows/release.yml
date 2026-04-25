@@ -29,6 +29,16 @@ jobs:
           npm run build
 
       - name: Publish
-        run: npm publish --provenance --access public
+        # Prerelease tags (e.g. v2.1.0-rc.1) ship under the `next` dist-tag so
+        # default `npm install` keeps pulling the verified `latest`. Tags with
+        # no hyphen (v2.0.0, v2.1.0) become `latest` automatically.
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            echo "Publishing prerelease ${GITHUB_REF_NAME} under dist-tag 'next'"
+            npm publish --provenance --access public --tag next
+          else
+            echo "Publishing release ${GITHUB_REF_NAME} under dist-tag 'latest'"
+            npm publish --provenance --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

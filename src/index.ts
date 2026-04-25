@@ -17,6 +17,7 @@ export type * from './specs/NativeAIToolkitSpec';
 
 import type {
   Barcode,
+  ChatMessage,
   DeviceCapabilities,
   Entity,
   GenerationOptions,
@@ -103,6 +104,10 @@ export function rewriteText(text: string, style: RewriteStyle): Promise<string> 
 
 export function generateText(prompt: string, options: GenerationOptions = {}): Promise<string> {
   return NativeAIToolkit.generateText(prompt, options);
+}
+
+export function chat(messages: ChatMessage[], options: GenerationOptions = {}): Promise<string> {
+  return NativeAIToolkit.chat(messages, options);
 }
 
 export function smartReplies(messages: SmartReplyMessage[]): Promise<string[]> {
