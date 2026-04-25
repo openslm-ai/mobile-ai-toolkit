@@ -1,6 +1,6 @@
 {
   "name": "@anivar/mobile-ai-toolkit",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "On-device AI for React Native. Zero cloud costs. One unified API.",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -65,9 +65,6 @@
   "peerDependencies": {
     "react": ">=19.0.0",
     "react-native": ">=0.80.0"
-  },
-  "dependencies": {
-    "@react-native-async-storage/async-storage": "^1.19.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",

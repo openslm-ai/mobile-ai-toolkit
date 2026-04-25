@@ -1,101 +1,79 @@
-/**
- * Codegen spec for Native AI Toolkit Turbo Module
- * This file is used by React Native Codegen to generate native interfaces
- */
-
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
-// Codegen types
 export interface DeviceCapabilities {
+  platform: 'ios' | 'android';
+  osVersion: string;
   hasNeuralEngine: boolean;
   hasAppleIntelligence: boolean;
   hasGeminiNano: boolean;
-  hasMLKit: boolean;
-  hasCoreML: boolean;
+  hasMLKitGenAI: boolean;
+  hasOnDeviceSpeech: boolean;
   supportedLanguages: string[];
-  modelVersions: { [key: string]: string };
+  features: {
+    analyzeText: boolean;
+    analyzeImage: boolean;
+    proofread: boolean;
+    summarize: boolean;
+    rewrite: boolean;
+    generate: boolean;
+    smartReplies: boolean;
+    extractEntities: boolean;
+    embedText: boolean;
+    translate: boolean;
+    transcribe: boolean;
+    scanBarcodes: boolean;
+    labelImage: boolean;
+    describeImage: boolean;
+    segmentPerson: boolean;
+  };
 }
 
 export interface TextAnalysisOptions {
   includeSentiment?: boolean;
   includeEntities?: boolean;
-  includeSummary?: boolean;
   language?: string;
 }
 
-export interface OnDeviceTextAnalysis {
-  sentiment: number;
-  entities: Array<{
-    text: string;
-    type: string;
-    confidence: number;
-    range: [number, number];
-  }>;
+export interface Entity {
+  text: string;
+  type:
+    | 'person'
+    | 'place'
+    | 'organization'
+    | 'email'
+    | 'phone'
+    | 'address'
+    | 'url'
+    | 'date'
+    | 'money'
+    | 'other';
+  confidence: number;
+  range: [number, number];
+}
+
+export interface TextAnalysis {
   language: string;
-  summary?: string;
+  sentiment?: number;
+  entities?: Entity[];
   confidence: number;
 }
 
-export interface VisionAnalysisOptions {
+export interface ImageAnalysisOptions {
   detectObjects?: boolean;
   detectFaces?: boolean;
   extractText?: boolean;
-  detectLandmarks?: boolean;
-  detectBarcode?: boolean;
 }
 
-export interface OnDeviceVisionAnalysis {
+export interface ImageAnalysis {
+  text: string;
   objects: Array<{
     label: string;
     confidence: number;
-    bounds: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    };
+    bounds: { x: number; y: number; width: number; height: number };
   }>;
   faces: Array<{
-    bounds: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    };
-    emotions?: { [key: string]: number };
-    age?: number;
-  }>;
-  text: string;
-  landmarks?: Array<{
-    name: string;
-    confidence: number;
-  }>;
-  barcode?: string;
-  confidence: number;
-}
-
-export interface VoiceAnalysisOptions {
-  language?: string;
-  enablePunctuation?: boolean;
-  enableWordTimestamps?: boolean;
-}
-
-export interface OnDeviceVoiceAnalysis {
-  transcript: string;
-  confidence: number;
-  language: string;
-  words: Array<{
-    text: string;
-    confidence: number;
-    startTime: number;
-    endTime: number;
-  }>;
-  intent?: string;
-  entities?: Array<{
-    text: string;
-    type: string;
-    confidence: number;
+    bounds: { x: number; y: number; width: number; height: number };
   }>;
 }
 
@@ -104,58 +82,81 @@ export interface ProofreadResult {
   corrections: Array<{
     original: string;
     corrected: string;
-    type: string;
+    type: 'spelling' | 'grammar';
     position: [number, number];
   }>;
 }
 
-export interface IntentClassification {
-  intent: string;
-  confidence: number;
-  parameters: { [key: string]: any };
+export interface TranscriptionOptions {
+  locale?: string;
+  enablePunctuation?: boolean;
 }
 
-/**
- * Native AI Toolkit Turbo Module Spec
- */
+export interface Transcript {
+  text: string;
+  confidence: number;
+  locale: string;
+}
+
+export interface SmartReplyMessage {
+  text: string;
+  fromUser: boolean;
+  timestampMs: number;
+}
+
+export interface GenerationOptions {
+  maxOutputTokens?: number;
+  temperature?: number;
+}
+
+export interface ImageLabel {
+  label: string;
+  confidence: number;
+}
+
+export interface Barcode {
+  rawValue: string;
+  format: string;
+  bounds: { x: number; y: number; width: number; height: number };
+}
+
+export interface PersonSegmentationResult {
+  /** Base64-encoded grayscale PNG mask. White = person, black = background. */
+  maskBase64: string;
+  width: number;
+  height: number;
+}
+
 export interface Spec extends TurboModule {
-  // Device capabilities
   getDeviceCapabilities(): Promise<DeviceCapabilities>;
 
-  // Text processing (on-device)
-  analyzeText(text: string, options: TextAnalysisOptions): Promise<OnDeviceTextAnalysis>;
+  // Text understanding
+  analyzeText(text: string, options: TextAnalysisOptions): Promise<TextAnalysis>;
+  extractEntities(text: string): Promise<Entity[]>;
+  identifyLanguage(text: string): Promise<string>;
+  embedText(text: string): Promise<number[]>;
 
-  // Writing assistance (iOS 18.1+ / Android 15+)
-  enhanceText(text: string, style: string): Promise<string>;
+  // Image understanding
+  analyzeImage(imageBase64: string, options: ImageAnalysisOptions): Promise<ImageAnalysis>;
+  scanBarcodes(imageBase64: string): Promise<Barcode[]>;
+  labelImage(imageBase64: string): Promise<ImageLabel[]>;
+  describeImage(imageBase64: string): Promise<string>;
+  segmentPerson(imageBase64: string): Promise<PersonSegmentationResult>;
 
+  // Generative
   proofreadText(text: string): Promise<ProofreadResult>;
-
   summarizeText(text: string, format: string): Promise<string>;
+  rewriteText(text: string, style: string): Promise<string>;
+  generateText(prompt: string, options: GenerationOptions): Promise<string>;
+  smartReplies(messages: SmartReplyMessage[]): Promise<string[]>;
+  translateText(text: string, sourceLang: string, targetLang: string): Promise<string>;
 
-  // Vision processing (on-device)
-  analyzeImage(
-    imageBase64: string,
-    options: VisionAnalysisOptions
-  ): Promise<OnDeviceVisionAnalysis>;
+  // Speech
+  transcribeAudioFile(filePath: string, options: TranscriptionOptions): Promise<Transcript>;
 
-  // Voice processing (on-device)
-  transcribeAudio(
-    audioBase64: string,
-    options: VoiceAnalysisOptions
-  ): Promise<OnDeviceVoiceAnalysis>;
-
-  // Smart features
-  generateSmartReplies(message: string, context?: string): Promise<string[]>;
-
-  classifyIntent(text: string): Promise<IntentClassification>;
-
-  // Privacy & security
+  // Privacy hint
   enablePrivateMode(enabled: boolean): void;
   isPrivateModeEnabled(): boolean;
-
-  // Performance
-  preloadModels(modelTypes: string[]): Promise<boolean>;
-  getModelStatus(): Promise<{ [key: string]: string }>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('AIToolkitTurboModule');
