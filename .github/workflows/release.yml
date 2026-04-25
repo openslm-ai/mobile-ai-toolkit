@@ -26,6 +26,7 @@ jobs:
       - name: Verify
         run: |
           npm run lint
+          npm test -- --ci
           npm run build
 
       - name: Publish
