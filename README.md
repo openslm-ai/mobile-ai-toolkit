@@ -1,318 +1,135 @@
 # @anivar/mobile-ai-toolkit
 
-<div align="center">
-  <h3>🚀 On-Device AI for React Native • Zero Cloud Costs • One Simple API</h3>
-  <p>Add AI to your React Native app in literally 3 lines of code</p>
-</div>
-
-<div align="center">
+On-device AI for React Native. One unified TypeScript API; each method is a thin TurboModule binding to a documented platform framework — Apple Vision / NaturalLanguage / Speech on iOS, Google ML Kit (incl. ML Kit GenAI on AICore-enabled devices) on Android. Nothing leaves the device, nothing is mocked.
 
 [![npm version](https://img.shields.io/npm/v/@anivar/mobile-ai-toolkit.svg?style=flat-square)](https://www.npmjs.com/package/@anivar/mobile-ai-toolkit)
-[![Downloads](https://img.shields.io/npm/dm/@anivar/mobile-ai-toolkit.svg?style=flat-square)](https://www.npmjs.com/package/@anivar/mobile-ai-toolkit)
 [![CI](https://img.shields.io/github/actions/workflow/status/openslm-ai/mobile-ai-toolkit/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/openslm-ai/mobile-ai-toolkit/actions/workflows/ci.yml)
 [![Provenance](https://img.shields.io/badge/npm-provenance-success?style=flat-square&logo=npm)](https://docs.npmjs.com/generating-provenance-statements)
-[![Bundle Size](https://img.shields.io/bundlephobia/minzip/@anivar/mobile-ai-toolkit?style=flat-square)](https://bundlephobia.com/package/@anivar/mobile-ai-toolkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey?style=flat-square)](https://reactnative.dev/)
-[![React Native](https://img.shields.io/badge/React%20Native-0.80%2B-blue?style=flat-square)](https://reactnative.dev/)
 
-</div>
+## Why
 
-## 🎯 Why This Library?
+A unified surface that hides the iOS/Android split *without* lying about it. Where one platform has a real API and the other doesn't, the call resolves on one side and rejects with `UNSUPPORTED_PLATFORM` / `FEATURE_UNAVAILABLE` on the other — never a polyfill, never a placeholder string. You probe `getDeviceCapabilities()` once, gate UI on the returned feature flags, and write the call site once.
 
-```javascript
-// ❌ Other libraries - Pick your poison:
-// Option 1: Expensive cloud APIs ($30K/month at scale)
-await openai.chat("Hello"); // $$$$
-
-// Option 2: Complex on-device setup
-const model = await tf.loadModel(...);
-const tensor = tf.tensor(...);
-// 100 lines later...
-
-// ✅ Mobile AI Toolkit - Best of both worlds:
-import { AI } from '@anivar/mobile-ai-toolkit';
-await AI.chat("Hello"); // FREE on-device, cloud fallback if needed
-```
-
-## 🏃 30-Second Quick Start
+## Install
 
 ```bash
 npm install @anivar/mobile-ai-toolkit
-# iOS only:
 cd ios && pod install
 ```
 
-```javascript
-import { AI } from '@anivar/mobile-ai-toolkit';
+Requires React Native 0.80+ (new architecture / TurboModules), react 19+. Minimum iOS 13, Android API 26.
 
-// That's it! AI now works on your app
-const response = await AI.chat("Hello!");
-console.log(response.message);
-```
+## Capability matrix
 
-## ✨ Features That Matter
+Every method below maps to a real platform call. ✅ = on-device. ⚠️ = on-device when supported by OEM/locale. ❌ = not implemented on that platform; the call rejects with `UNSUPPORTED_PLATFORM`.
 
-| Feature | What It Means For You |
-|---------|----------------------|
-| **🏠 On-Device First** | $0 API costs for 90% of use cases |
-| **⚡ 50ms Response** | 10x faster than cloud APIs |
-| **🔒 100% Private** | User data never leaves the device |
-| **📴 Offline Ready** | Works in airplane mode |
-| **🎯 Smart Routing** | Automatically uses on-device when possible, cloud when needed |
-| **🏗️ Turbo Modules** | Built with React Native's latest architecture |
+| Method | iOS | Android |
+|---|---|---|
+| `getDeviceCapabilities()` | ✅ — feature probe | ✅ — feature probe |
+| `analyzeText(text, opts)` | ✅ NaturalLanguage — sentiment + entities | ✅ ML Kit Language ID + Entity Extraction |
+| `extractEntities(text)` | ✅ `NLTagSchemeNameType` | ✅ ML Kit `EntityExtraction` |
+| `identifyLanguage(text)` | ✅ `NLLanguageRecognizer` | ✅ ML Kit `LanguageIdentification` |
+| `embedText(text)` | ✅ `NLContextualEmbedding` (iOS 17+) | ❌ |
+| `analyzeImage(b64, opts)` | ✅ Vision OCR + face rects + iOS 17 foreground mask | ✅ ML Kit text + objects + faces |
+| `scanBarcodes(b64)` | ✅ `VNDetectBarcodesRequest` | ✅ ML Kit `BarcodeScanning` |
+| `labelImage(b64)` | ✅ `VNClassifyImageRequest` | ✅ ML Kit `ImageLabeling` |
+| `describeImage(b64)` | ❌ | ✅ ML Kit GenAI `ImageDescription` *(Beta, AICore)* |
+| `segmentPerson(b64)` | ✅ `VNGeneratePersonSegmentationRequest` (iOS 15+) | ✅ ML Kit `SelfieSegmentation` |
+| `proofreadText(text)` | ✅ `UITextChecker` *(spelling only)* | ✅ ML Kit GenAI `Proofreader` *(Beta, AICore)* |
+| `summarizeText(text, fmt)` | ❌ — Foundation Models bridge in v2.1 | ✅ ML Kit GenAI `Summarizer` *(Beta, AICore)* |
+| `rewriteText(text, style)` | ❌ — Foundation Models bridge in v2.1 | ✅ ML Kit GenAI `Rewriter` *(Beta, AICore)* |
+| `generateText(prompt, opts)` | ❌ — Foundation Models bridge in v2.1 | ✅ ML Kit GenAI `Prompt` API *(Beta, Gemini Nano / Gemma 4 via AICore)* |
+| `smartReplies(messages)` | ❌ — no public iOS equivalent | ✅ ML Kit `SmartReply` (GA) |
+| `translateText(text, src, tgt)` | ❌ — Translation framework bridge in v2.1 | ✅ ML Kit `Translator` (GA, downloads language pack on first use) |
+| `transcribeAudioFile(path, opts)` | ✅ `SFSpeechRecognizer` with `requiresOnDeviceRecognition = true` | ⚠️ `SpeechRecognizer` with `EXTRA_PREFER_OFFLINE` (OEM-dependent) |
 
-## 🔥 Real Examples
+`getDeviceCapabilities().features` returns a `Record<MethodName, boolean>` map so you can show or hide UI without try/catch.
 
-### Text Analysis (FREE, On-Device)
-```javascript
-const result = await AI.analyze("I love this app!");
-// { sentiment: 0.9, language: "en", entities: [...] }
-// ⚡ 20ms • 💰 $0 • 🔒 Private
-```
+## Quick start
 
-### Image Understanding (FREE, On-Device)
-```javascript
-const result = await AI.understand(imageBase64);
-// { objects: ["cat", "sofa"], text: "Hello", faces: 2 }
-// ⚡ 50ms • 💰 $0 • 🔒 Private
-```
+```ts
+import {
+  getDeviceCapabilities,
+  analyzeText,
+  analyzeImage,
+  scanBarcodes,
+  labelImage,
+  segmentPerson,
+  summarizeText,
+  rewriteText,
+  generateText,
+  smartReplies,
+  translateText,
+  transcribeAudioFile,
+} from '@anivar/mobile-ai-toolkit';
 
-### Chat with LLMs (Cloud Fallback)
-```javascript
-const response = await AI.chat("Explain quantum physics");
-// Uses on-device if available, cloud if needed
-// ⚡ Fast • 💰 Free/Cheap • 🔒 Configurable
-```
+// 1. Probe once at startup, gate UI on the feature map.
+const caps = await getDeviceCapabilities();
 
-### Speech to Text (FREE, On-Device)
-```javascript
-const result = await AI.transcribe(audioBase64);
-// { transcript: "Hello world", confidence: 0.98 }
-// ⚡ 100ms • 💰 $0 • 🔒 Private
-```
-
-## 💰 Cost Comparison
-
-| Daily Usage | Mobile AI Toolkit | OpenAI/Cloud | Savings |
-|-------------|------------------|--------------|---------|
-| 1K requests | **$0** | $10 | $300/mo |
-| 10K requests | **$0** | $100 | $3,000/mo |
-| 100K requests | **$0-50** | $1,000 | $30,000/mo |
-
-## 🛠️ Setup (2 Minutes)
-
-### 1. Install
-```bash
-npm install @anivar/mobile-ai-toolkit
-```
-
-### 2. iOS Setup
-```bash
-cd ios && pod install
-```
-
-### 3. Android Setup
-Already configured! Just rebuild:
-```bash
-npx react-native run-android
-```
-
-### 4. Configure (Optional)
-```javascript
-AI.configure({
-  preferOnDevice: true,      // Default: true
-  enablePrivateMode: false,  // Default: false
-  cacheEnabled: true,        // Default: true
-  proxyURL: 'your-proxy'     // Optional: for cloud features
+// 2. Universal text + image — works on every iOS/Android device.
+const analysis = await analyzeText('I really like this app', {
+  includeSentiment: true,
+  includeEntities: true,
 });
-```
+// → { language: 'en', sentiment: 0.6, entities: [...], confidence: 0.9 }
 
-## 📖 Full API Reference
+const img = await analyzeImage(base64png, { extractText: true, detectFaces: true });
+const codes = await scanBarcodes(base64png);
+const labels = await labelImage(base64png);
+const { maskBase64, width, height } = await segmentPerson(base64png);
 
-### Core Methods
-
-```typescript
-// Chat with AI
-AI.chat(message: string, options?: ChatOptions): Promise<ChatResponse>
-
-// Analyze text
-AI.analyze(text: string, options?: AnalysisOptions): Promise<TextAnalysis>
-
-// Understand images
-AI.understand(imageBase64: string, options?: VisionOptions): Promise<VisionResult>
-
-// Transcribe audio
-AI.transcribe(audioBase64: string, options?: AudioOptions): Promise<Transcript>
-
-// Smart replies
-AI.smartReply(message: string, context?: string): Promise<string[]>
-
-// Text enhancement
-AI.enhanceText(text: string, style: string): Promise<string>
-
-// Usage tracking
-AI.getUsage(): Promise<UsageStats>
-```
-
-## 🎮 Complete React Native Example
-
-```javascript
-import React, { useState } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
-import { AI } from '@anivar/mobile-ai-toolkit';
-
-export default function App() {
-  const [input, setInput] = useState('');
-  const [result, setResult] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleAnalyze = async () => {
-    setLoading(true);
-    try {
-      // Sentiment analysis - runs on device, costs $0
-      const analysis = await AI.analyze(input);
-      setResult(`Sentiment: ${analysis.sentiment > 0 ? '😊' : '😔'}`);
-    } catch (error) {
-      setResult(`Error: ${error.message}`);
-    }
-    setLoading(false);
-  };
-
-  return (
-    <View style={{ padding: 20 }}>
-      <TextInput
-        value={input}
-        onChangeText={setInput}
-        placeholder="Enter text to analyze..."
-        style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
-      />
-      <Button
-        title={loading ? "Analyzing..." : "Analyze"}
-        onPress={handleAnalyze}
-        disabled={loading}
-      />
-      <Text style={{ marginTop: 20 }}>{result}</Text>
-    </View>
-  );
+// 3. Generative — gate on the feature map.
+if (caps.features.summarize) {
+  const tldr = await summarizeText(longArticle, 'bullets');
 }
+if (caps.features.generate) {
+  const reply = await generateText('Write a polite decline.', { maxOutputTokens: 80 });
+}
+
+// 4. Platform-specific calls reject cleanly when unsupported.
+try {
+  const replies = await smartReplies([
+    { text: 'Want to grab lunch?', fromUser: false, timestampMs: Date.now() },
+  ]);
+} catch (e) {
+  // iOS: { code: 'UNSUPPORTED_PLATFORM' }
+}
+
+// 5. On-device transcription.
+const t = await transcribeAudioFile('/path/to/clip.m4a', { locale: 'en-US' });
 ```
 
-## 🚀 Advanced Features
+### Privacy-mode flag
 
-### Privacy Mode (Force On-Device Only)
-```javascript
-AI.configure({ enablePrivateMode: true });
-// Now ALL processing stays on device - no cloud fallback
+A boolean stored in the native module. It does not enforce anything by itself — read it from your app code before triggering methods that fetch model assets (e.g. `translateText` downloads a language pack on first use, ML Kit GenAI APIs may pull a model via AICore).
+
+```ts
+import { enablePrivateMode, isPrivateModeEnabled } from '@anivar/mobile-ai-toolkit';
+enablePrivateMode(true);
 ```
 
-### Custom Cloud Endpoints
-```javascript
-AI.configure({
-  proxyURL: 'https://your-server.com/ai'
-});
-// Use your own backend for cloud features
-```
+## Device-class gotchas
 
-### Caching for Instant Responses
-```javascript
-// First call: 100ms
-await AI.analyze("Hello world");
+- **ML Kit GenAI** (`summarizeText`, `rewriteText`, `proofreadText`, `describeImage`, `generateText` on Android) runs only on AICore-enabled devices: Pixel 9+, Samsung S25+, and select 2024–2026 flagships from Xiaomi / OPPO / Honor with locked bootloaders. Pixel 10+ uses Gemma 4 via AICore. On unsupported devices these methods reject with `FEATURE_UNAVAILABLE` — always check `caps.features.<method>` first.
+- **iOS on-device speech** (`SFSpeechRecognizer.supportsOnDeviceRecognition`) returns true on most modern devices but can be false for locales whose speech model isn't installed.
+- **iOS proofread** uses `UITextChecker` and is spelling-only; the Apple Intelligence Writing Tools rewrite UI has no programmatic invocation API.
+- **iOS embeddings** require iOS 17+ and a model loaded for the script of the input (Latin / CJK / Cyrillic / etc.); unsupported scripts reject with `FEATURE_UNAVAILABLE`.
 
-// Second call: 0ms (from cache!)
-await AI.analyze("Hello world");
-```
+## What's NOT in this package
 
-## 🏗️ Architecture
+- **No multi-turn `chat()` session.** ML Kit GenAI's Prompt API does not expose persistent sessions across the JNI boundary in a stable form yet; Apple Foundation Models is Swift-only and needs a bridging layer. `generateText()` is single-shot for now.
+- **No iOS generative methods.** `summarizeText` / `rewriteText` / `generateText` reject `UNSUPPORTED_PLATFORM` on iOS until the v2.1 Foundation Models bridge lands.
+- **No intent classification.** No public on-device intent-classifier API on either platform that beats a hardcoded keyword matcher.
+- **No iOS Writing Tools rewrite.** The system UI can be attached to a `UITextView`, but it has no programmatic API.
+- **No cloud fallback.** Out of scope; call your own backend from JS if you need it.
 
-```
-Your App
-    ↓
-Mobile AI Toolkit (JavaScript)
-    ↓
-Turbo Module Bridge (C++)
-    ↓
-┌─────────────────┬─────────────────┐
-│   iOS Native    │  Android Native │
-│   Core ML       │    ML Kit       │
-│   Vision API    │  TensorFlow Lite│
-│   Natural Lang  │    Gemini Nano  │
-└─────────────────┴─────────────────┘
-```
+## Roadmap
 
-## 📱 Platform Support
+- **v2.1** — Swift bridging layer for **Apple Foundation Models** (iOS 26+, A17 Pro+) backing `summarizeText`, `rewriteText`, `generateText`, plus a new multi-turn `chat()`.
+- **v2.1** — **Apple Translation** framework bridge for `translateText` on iOS 17.4+.
+- **v2.2** — Streaming variants of `generateText` / `summarizeText` / `rewriteText` (token callbacks) on Android via the Prompt API streaming surface.
 
-| Feature | iOS | Android |
-|---------|-----|---------|
-| Text Analysis | ✅ 13+ | ✅ API 21+ |
-| Image Understanding | ✅ 13+ | ✅ API 21+ |
-| Speech Recognition | ✅ 13+ | ✅ API 21+ |
-| Face Detection | ✅ 13+ | ✅ API 21+ |
-| Language Detection | ✅ 13+ | ✅ API 21+ |
-| Smart Reply | ✅ 15+ | ✅ API 29+ |
-| Text Enhancement | ✅ 15+ | ⚠️ Limited |
+## License
 
-## 🐛 Troubleshooting
-
-### iOS Build Issues
-```bash
-# Clean and rebuild
-cd ios
-rm -rf Pods Podfile.lock
-pod install
-```
-
-### Android Build Issues
-```bash
-# Clean and rebuild
-cd android
-./gradlew clean
-cd ..
-npx react-native run-android
-```
-
-### TypeScript Issues
-```bash
-# Regenerate types
-npm run build
-```
-
-## 🤝 Contributing
-
-We love contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-```bash
-# Clone and develop
-git clone https://github.com/openslm-ai/mobile-ai-toolkit
-cd mobile-ai-toolkit
-npm install
-npm run dev
-```
-
-## 📊 Performance Benchmarks
-
-| Operation | On-Device | Cloud API | Improvement |
-|-----------|-----------|-----------|-------------|
-| Text Sentiment | 20ms | 800ms | **40x faster** |
-| Image Analysis | 50ms | 1500ms | **30x faster** |
-| OCR | 100ms | 1200ms | **12x faster** |
-| Face Detection | 30ms | 1000ms | **33x faster** |
-
-## 🔗 Links
-
-- [Documentation](https://github.com/openslm-ai/mobile-ai-toolkit)
-- [Examples](https://github.com/openslm-ai/mobile-ai-toolkit/examples)
-- [Report Issues](https://github.com/openslm-ai/mobile-ai-toolkit/issues)
-- [NPM Package](https://www.npmjs.com/package/@anivar/mobile-ai-toolkit)
-
-## 📄 License
-
-MIT © [OpenSLM](https://openslm.ai)
-
----
-
-<div align="center">
-  <b>Built with ❤️ for the React Native community</b>
-  <br>
-  <sub>Making AI accessible, affordable, and private for every mobile developer</sub>
-</div>
+MIT © Anivar Aravind
