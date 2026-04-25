@@ -9,6 +9,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@anivar/mobile-ai-toolkit.svg?style=flat-square)](https://www.npmjs.com/package/@anivar/mobile-ai-toolkit)
 [![Downloads](https://img.shields.io/npm/dm/@anivar/mobile-ai-toolkit.svg?style=flat-square)](https://www.npmjs.com/package/@anivar/mobile-ai-toolkit)
+[![CI](https://img.shields.io/github/actions/workflow/status/openslm-ai/mobile-ai-toolkit/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/openslm-ai/mobile-ai-toolkit/actions/workflows/ci.yml)
+[![Provenance](https://img.shields.io/badge/npm-provenance-success?style=flat-square&logo=npm)](https://docs.npmjs.com/generating-provenance-statements)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/@anivar/mobile-ai-toolkit?style=flat-square)](https://bundlephobia.com/package/@anivar/mobile-ai-toolkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey?style=flat-square)](https://reactnative.dev/)
