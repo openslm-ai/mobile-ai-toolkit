@@ -179,14 +179,23 @@ dependencies {
   implementation 'com.facebook.react:react-native:+'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-  // ML Kit dependencies (Vanilla Android - works on all devices)
-  implementation 'com.google.mlkit:text-recognition:16.0.0'
-  implementation 'com.google.mlkit:object-detection:17.0.1'
-  implementation 'com.google.mlkit:face-detection:16.1.5'
-  implementation 'com.google.mlkit:language-id:17.0.4'
-  implementation 'com.google.mlkit:translate:17.0.1'
+  // ML Kit base APIs (GA, work on all devices)
+  implementation 'com.google.mlkit:text-recognition:16.0.1'
+  implementation 'com.google.mlkit:object-detection:17.0.2'
+  implementation 'com.google.mlkit:face-detection:16.1.7'
+  implementation 'com.google.mlkit:language-id:17.0.6'
+  implementation 'com.google.mlkit:translate:17.0.3'
+  implementation 'com.google.mlkit:smart-reply:17.0.4'
+  implementation 'com.google.mlkit:entity-extraction:16.0.0-beta6'
+  implementation 'com.google.mlkit:barcode-scanning:17.3.0'
+  implementation 'com.google.mlkit:image-labeling:17.0.9'
+  implementation 'com.google.mlkit:segmentation-selfie:16.0.0-beta6'
 
-  // ML Kit GenAI APIs (2025) - Gemini Nano support
-  // Works on Pixel, Samsung, Xiaomi, OnePlus etc (vanilla)
-  implementation 'com.google.mlkit:genai:1.0.0'
+  // ML Kit GenAI APIs (Beta) - require AICore-enabled devices (Pixel 9+, S25+, Pixel 10+ for Gemma 4).
+  // Methods that depend on these reject FEATURE_UNAVAILABLE on unsupported devices.
+  implementation 'com.google.mlkit:genai-summarization:1.0.0-beta1'
+  implementation 'com.google.mlkit:genai-rewriting:1.0.0-beta1'
+  implementation 'com.google.mlkit:genai-proofreading:1.0.0-beta1'
+  implementation 'com.google.mlkit:genai-image-description:1.0.0-beta1'
+  implementation 'com.google.mlkit:genai-prompt:1.0.0-beta2'
 }

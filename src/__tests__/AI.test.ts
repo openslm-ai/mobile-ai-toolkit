@@ -1,58 +1,133 @@
-import { AI } from '../index';
+jest.mock("../specs/NativeAIToolkitSpec", () => ({
+	__esModule: true,
+	default: {
+		getDeviceCapabilities: jest.fn(async () => ({
+			platform: "ios",
+			osVersion: "18.0",
+			hasNeuralEngine: true,
+			hasAppleIntelligence: false,
+			hasGeminiNano: false,
+			hasMLKitGenAI: false,
+			hasOnDeviceSpeech: true,
+			supportedLanguages: ["en", "es"],
+			features: {
+				analyzeText: true,
+				analyzeImage: true,
+				proofread: true,
+				summarize: false,
+				rewrite: false,
+				smartReplies: false,
+				extractEntities: true,
+				translate: false,
+				transcribe: true,
+			},
+		})),
+		analyzeText: jest.fn(async (_text: string) => ({
+			language: "en",
+			sentiment: 0.5,
+			confidence: 0.9,
+		})),
+		extractEntities: jest.fn(async () => []),
+		identifyLanguage: jest.fn(async () => "en"),
+		analyzeImage: jest.fn(async () => ({ text: "", objects: [], faces: [] })),
+		proofreadText: jest.fn(async (text: string) => ({
+			correctedText: text,
+			corrections: [],
+		})),
+		summarizeText: jest.fn(async () => {
+			throw new Error("UNSUPPORTED_PLATFORM");
+		}),
+		rewriteText: jest.fn(async () => {
+			throw new Error("UNSUPPORTED_PLATFORM");
+		}),
+		smartReplies: jest.fn(async () => []),
+		translateText: jest.fn(async () => {
+			throw new Error("UNSUPPORTED_PLATFORM");
+		}),
+		transcribeAudioFile: jest.fn(async () => ({
+			text: "hello",
+			confidence: 0.9,
+			locale: "en-US",
+		})),
+		enablePrivateMode: jest.fn(),
+		isPrivateModeEnabled: jest.fn(() => false),
+	},
+}));
 
-describe('AI Toolkit', () => {
-  beforeAll(async () => {
-    await AI.initialize();
-  });
+import {
+	analyzeImage,
+	analyzeText,
+	enablePrivateMode,
+	extractEntities,
+	getDeviceCapabilities,
+	identifyLanguage,
+	isPrivateModeEnabled,
+	proofreadText,
+	rewriteText,
+	smartReplies,
+	summarizeText,
+	transcribeAudioFile,
+	translateText,
+} from "../index";
 
-  test('should initialize successfully', async () => {
-    const capabilities = AI.getDeviceCapabilities();
-    expect(capabilities).toBeDefined();
-    expect(capabilities).toHaveProperty('hasCoreML');
-    expect(capabilities).toHaveProperty('hasMLKit');
-  });
+describe("mobile-ai-toolkit", () => {
+	test("exports a function-based API (no AI class)", () => {
+		expect(typeof getDeviceCapabilities).toBe("function");
+		expect(typeof analyzeText).toBe("function");
+		expect(typeof analyzeImage).toBe("function");
+		expect(typeof proofreadText).toBe("function");
+		expect(typeof transcribeAudioFile).toBe("function");
+	});
 
-  test('should analyze text sentiment', async () => {
-    const result = await AI.analyze('I love this app!');
-    expect(result).toBeDefined();
-    expect(result).toHaveProperty('sentiment');
-    expect(result).toHaveProperty('language');
-    expect(result.sentiment).toBeGreaterThanOrEqual(-1);
-    expect(result.sentiment).toBeLessThanOrEqual(1);
-  });
+	test("getDeviceCapabilities returns shape with features map", async () => {
+		const caps = await getDeviceCapabilities();
+		expect(caps.platform).toBeDefined();
+		expect(caps.features).toBeDefined();
+		expect(typeof caps.features.analyzeText).toBe("boolean");
+		expect(typeof caps.features.summarize).toBe("boolean");
+		expect(Array.isArray(caps.supportedLanguages)).toBe(true);
+	});
 
-  test('should handle image analysis', async () => {
-    const mockBase64 =
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-    const result = await AI.understand(mockBase64);
-    expect(result).toBeDefined();
-    expect(result).toHaveProperty('objects');
-    expect(result).toHaveProperty('text');
-    expect(result).toHaveProperty('faces');
-  });
+	test("analyzeText returns language + optional sentiment", async () => {
+		const result = await analyzeText("I love this", { includeSentiment: true });
+		expect(result.language).toBe("en");
+		expect(result.sentiment).toBeGreaterThanOrEqual(-1);
+		expect(result.sentiment as number).toBeLessThanOrEqual(1);
+	});
 
-  test('should get device capabilities', () => {
-    const capabilities = AI.getDeviceCapabilities();
-    expect(capabilities).toBeDefined();
-    expect(typeof capabilities.hasCoreML).toBe('boolean');
-    expect(typeof capabilities.hasMLKit).toBe('boolean');
-    expect(Array.isArray(capabilities.supportedLanguages)).toBe(true);
-  });
+	test("extractEntities and identifyLanguage are callable", async () => {
+		await expect(extractEntities("hello")).resolves.toEqual([]);
+		await expect(identifyLanguage("hello")).resolves.toBe("en");
+	});
 
-  test('should handle configuration', () => {
-    AI.configure({
-      preferOnDevice: true,
-      enablePrivateMode: false,
-      cacheEnabled: true,
-    });
+	test("analyzeImage returns text/objects/faces shape", async () => {
+		const result = await analyzeImage("AAAA", { extractText: true });
+		expect(result).toHaveProperty("text");
+		expect(result).toHaveProperty("objects");
+		expect(result).toHaveProperty("faces");
+	});
 
-    // Configuration is stored internally, so just test that configure doesn't throw
-    expect(() => AI.configure({ preferOnDevice: false })).not.toThrow();
-  });
+	test("proofread iOS path returns correctedText", async () => {
+		const result = await proofreadText("helo wrld");
+		expect(result.correctedText).toBeDefined();
+		expect(Array.isArray(result.corrections)).toBe(true);
+	});
 
-  test('should support private mode', () => {
-    // Private mode is handled through configuration
-    expect(() => AI.configure({ enablePrivateMode: true })).not.toThrow();
-    expect(() => AI.configure({ enablePrivateMode: false })).not.toThrow();
-  });
+	test("summarize/rewrite/translate reject UNSUPPORTED_PLATFORM on iOS mock", async () => {
+		await expect(summarizeText("long text", "bullets")).rejects.toThrow();
+		await expect(rewriteText("hello", "professional")).rejects.toThrow();
+		await expect(translateText("hello", "en", "es")).rejects.toThrow();
+	});
+
+	test("smartReplies returns array", async () => {
+		const replies = await smartReplies([
+			{ text: "how are you?", fromUser: false, timestampMs: Date.now() },
+		]);
+		expect(Array.isArray(replies)).toBe(true);
+	});
+
+	test("private mode toggles", () => {
+		enablePrivateMode(true);
+		expect(typeof isPrivateModeEnabled()).toBe("boolean");
+	});
 });
