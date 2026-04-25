@@ -3,7 +3,14 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        types: ['jest', 'node'],
+        esModuleInterop: true,
+        module: 'commonjs',
+        moduleResolution: 'node',
+      },
+    }],
   },
   transformIgnorePatterns: ['node_modules/(?!(react-native|@react-native)/)'],
   moduleNameMapper: {
