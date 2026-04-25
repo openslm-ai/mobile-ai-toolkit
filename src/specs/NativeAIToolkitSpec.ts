@@ -1,175 +1,162 @@
-import type { TurboModule } from "react-native";
-import { TurboModuleRegistry } from "react-native";
+import type { TurboModule } from 'react-native';
+import { TurboModuleRegistry } from 'react-native';
 
 export interface DeviceCapabilities {
-	platform: "ios" | "android";
-	osVersion: string;
-	hasNeuralEngine: boolean;
-	hasAppleIntelligence: boolean;
-	hasGeminiNano: boolean;
-	hasMLKitGenAI: boolean;
-	hasOnDeviceSpeech: boolean;
-	supportedLanguages: string[];
-	features: {
-		analyzeText: boolean;
-		analyzeImage: boolean;
-		proofread: boolean;
-		summarize: boolean;
-		rewrite: boolean;
-		generate: boolean;
-		smartReplies: boolean;
-		extractEntities: boolean;
-		embedText: boolean;
-		translate: boolean;
-		transcribe: boolean;
-		scanBarcodes: boolean;
-		labelImage: boolean;
-		describeImage: boolean;
-		segmentPerson: boolean;
-	};
+  platform: 'ios' | 'android';
+  osVersion: string;
+  hasNeuralEngine: boolean;
+  hasAppleIntelligence: boolean;
+  hasGeminiNano: boolean;
+  hasMLKitGenAI: boolean;
+  hasOnDeviceSpeech: boolean;
+  supportedLanguages: string[];
+  features: {
+    analyzeText: boolean;
+    analyzeImage: boolean;
+    proofread: boolean;
+    summarize: boolean;
+    rewrite: boolean;
+    generate: boolean;
+    smartReplies: boolean;
+    extractEntities: boolean;
+    embedText: boolean;
+    translate: boolean;
+    transcribe: boolean;
+    scanBarcodes: boolean;
+    labelImage: boolean;
+    describeImage: boolean;
+    segmentPerson: boolean;
+  };
 }
 
 export interface TextAnalysisOptions {
-	includeSentiment?: boolean;
-	includeEntities?: boolean;
-	language?: string;
+  includeSentiment?: boolean;
+  includeEntities?: boolean;
+  language?: string;
 }
 
 export interface Entity {
-	text: string;
-	type:
-		| "person"
-		| "place"
-		| "organization"
-		| "email"
-		| "phone"
-		| "address"
-		| "url"
-		| "date"
-		| "money"
-		| "other";
-	confidence: number;
-	range: [number, number];
+  text: string;
+  type:
+    | 'person'
+    | 'place'
+    | 'organization'
+    | 'email'
+    | 'phone'
+    | 'address'
+    | 'url'
+    | 'date'
+    | 'money'
+    | 'other';
+  confidence: number;
+  range: [number, number];
 }
 
 export interface TextAnalysis {
-	language: string;
-	sentiment?: number;
-	entities?: Entity[];
-	confidence: number;
+  language: string;
+  sentiment?: number;
+  entities?: Entity[];
+  confidence: number;
 }
 
 export interface ImageAnalysisOptions {
-	detectObjects?: boolean;
-	detectFaces?: boolean;
-	extractText?: boolean;
+  detectObjects?: boolean;
+  detectFaces?: boolean;
+  extractText?: boolean;
 }
 
 export interface ImageAnalysis {
-	text: string;
-	objects: Array<{
-		label: string;
-		confidence: number;
-		bounds: { x: number; y: number; width: number; height: number };
-	}>;
-	faces: Array<{
-		bounds: { x: number; y: number; width: number; height: number };
-	}>;
+  text: string;
+  objects: Array<{
+    label: string;
+    confidence: number;
+    bounds: { x: number; y: number; width: number; height: number };
+  }>;
+  faces: Array<{
+    bounds: { x: number; y: number; width: number; height: number };
+  }>;
 }
 
 export interface ProofreadResult {
-	correctedText: string;
-	corrections: Array<{
-		original: string;
-		corrected: string;
-		type: "spelling" | "grammar";
-		position: [number, number];
-	}>;
+  correctedText: string;
+  corrections: Array<{
+    original: string;
+    corrected: string;
+    type: 'spelling' | 'grammar';
+    position: [number, number];
+  }>;
 }
 
 export interface TranscriptionOptions {
-	locale?: string;
-	enablePunctuation?: boolean;
+  locale?: string;
+  enablePunctuation?: boolean;
 }
 
 export interface Transcript {
-	text: string;
-	confidence: number;
-	locale: string;
+  text: string;
+  confidence: number;
+  locale: string;
 }
 
 export interface SmartReplyMessage {
-	text: string;
-	fromUser: boolean;
-	timestampMs: number;
+  text: string;
+  fromUser: boolean;
+  timestampMs: number;
 }
 
 export interface GenerationOptions {
-	maxOutputTokens?: number;
-	temperature?: number;
+  maxOutputTokens?: number;
+  temperature?: number;
 }
 
 export interface ImageLabel {
-	label: string;
-	confidence: number;
+  label: string;
+  confidence: number;
 }
 
 export interface Barcode {
-	rawValue: string;
-	format: string;
-	bounds: { x: number; y: number; width: number; height: number };
+  rawValue: string;
+  format: string;
+  bounds: { x: number; y: number; width: number; height: number };
 }
 
 export interface PersonSegmentationResult {
-	/** Base64-encoded grayscale PNG mask. White = person, black = background. */
-	maskBase64: string;
-	width: number;
-	height: number;
+  /** Base64-encoded grayscale PNG mask. White = person, black = background. */
+  maskBase64: string;
+  width: number;
+  height: number;
 }
 
 export interface Spec extends TurboModule {
-	getDeviceCapabilities(): Promise<DeviceCapabilities>;
+  getDeviceCapabilities(): Promise<DeviceCapabilities>;
 
-	// Text understanding
-	analyzeText(
-		text: string,
-		options: TextAnalysisOptions,
-	): Promise<TextAnalysis>;
-	extractEntities(text: string): Promise<Entity[]>;
-	identifyLanguage(text: string): Promise<string>;
-	embedText(text: string): Promise<number[]>;
+  // Text understanding
+  analyzeText(text: string, options: TextAnalysisOptions): Promise<TextAnalysis>;
+  extractEntities(text: string): Promise<Entity[]>;
+  identifyLanguage(text: string): Promise<string>;
+  embedText(text: string): Promise<number[]>;
 
-	// Image understanding
-	analyzeImage(
-		imageBase64: string,
-		options: ImageAnalysisOptions,
-	): Promise<ImageAnalysis>;
-	scanBarcodes(imageBase64: string): Promise<Barcode[]>;
-	labelImage(imageBase64: string): Promise<ImageLabel[]>;
-	describeImage(imageBase64: string): Promise<string>;
-	segmentPerson(imageBase64: string): Promise<PersonSegmentationResult>;
+  // Image understanding
+  analyzeImage(imageBase64: string, options: ImageAnalysisOptions): Promise<ImageAnalysis>;
+  scanBarcodes(imageBase64: string): Promise<Barcode[]>;
+  labelImage(imageBase64: string): Promise<ImageLabel[]>;
+  describeImage(imageBase64: string): Promise<string>;
+  segmentPerson(imageBase64: string): Promise<PersonSegmentationResult>;
 
-	// Generative
-	proofreadText(text: string): Promise<ProofreadResult>;
-	summarizeText(text: string, format: string): Promise<string>;
-	rewriteText(text: string, style: string): Promise<string>;
-	generateText(prompt: string, options: GenerationOptions): Promise<string>;
-	smartReplies(messages: SmartReplyMessage[]): Promise<string[]>;
-	translateText(
-		text: string,
-		sourceLang: string,
-		targetLang: string,
-	): Promise<string>;
+  // Generative
+  proofreadText(text: string): Promise<ProofreadResult>;
+  summarizeText(text: string, format: string): Promise<string>;
+  rewriteText(text: string, style: string): Promise<string>;
+  generateText(prompt: string, options: GenerationOptions): Promise<string>;
+  smartReplies(messages: SmartReplyMessage[]): Promise<string[]>;
+  translateText(text: string, sourceLang: string, targetLang: string): Promise<string>;
 
-	// Speech
-	transcribeAudioFile(
-		filePath: string,
-		options: TranscriptionOptions,
-	): Promise<Transcript>;
+  // Speech
+  transcribeAudioFile(filePath: string, options: TranscriptionOptions): Promise<Transcript>;
 
-	// Privacy hint
-	enablePrivateMode(enabled: boolean): void;
-	isPrivateModeEnabled(): boolean;
+  // Privacy hint
+  enablePrivateMode(enabled: boolean): void;
+  isPrivateModeEnabled(): boolean;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>("AIToolkitTurboModule");
+export default TurboModuleRegistry.getEnforcing<Spec>('AIToolkitTurboModule');

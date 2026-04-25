@@ -11,134 +11,123 @@
  * `getDeviceCapabilities()` first or guard with try/catch.
  */
 
-import NativeAIToolkit from "./specs/NativeAIToolkitSpec";
+import NativeAIToolkit from './specs/NativeAIToolkitSpec';
 
-export type * from "./specs/NativeAIToolkitSpec";
+export type * from './specs/NativeAIToolkitSpec';
 
 import type {
-	Barcode,
-	DeviceCapabilities,
-	Entity,
-	GenerationOptions,
-	ImageAnalysis,
-	ImageAnalysisOptions,
-	ImageLabel,
-	PersonSegmentationResult,
-	ProofreadResult,
-	SmartReplyMessage,
-	TextAnalysis,
-	TextAnalysisOptions,
-	Transcript,
-	TranscriptionOptions,
-} from "./specs/NativeAIToolkitSpec";
+  Barcode,
+  DeviceCapabilities,
+  Entity,
+  GenerationOptions,
+  ImageAnalysis,
+  ImageAnalysisOptions,
+  ImageLabel,
+  PersonSegmentationResult,
+  ProofreadResult,
+  SmartReplyMessage,
+  TextAnalysis,
+  TextAnalysisOptions,
+  Transcript,
+  TranscriptionOptions,
+} from './specs/NativeAIToolkitSpec';
 
 export function getDeviceCapabilities(): Promise<DeviceCapabilities> {
-	return NativeAIToolkit.getDeviceCapabilities();
+  return NativeAIToolkit.getDeviceCapabilities();
 }
 
 export function analyzeText(
-	text: string,
-	options: TextAnalysisOptions = {},
+  text: string,
+  options: TextAnalysisOptions = {}
 ): Promise<TextAnalysis> {
-	return NativeAIToolkit.analyzeText(text, options);
+  return NativeAIToolkit.analyzeText(text, options);
 }
 
 export function extractEntities(text: string): Promise<Entity[]> {
-	return NativeAIToolkit.extractEntities(text);
+  return NativeAIToolkit.extractEntities(text);
 }
 
 export function identifyLanguage(text: string): Promise<string> {
-	return NativeAIToolkit.identifyLanguage(text);
+  return NativeAIToolkit.identifyLanguage(text);
 }
 
 export function embedText(text: string): Promise<number[]> {
-	return NativeAIToolkit.embedText(text);
+  return NativeAIToolkit.embedText(text);
 }
 
 export function analyzeImage(
-	imageBase64: string,
-	options: ImageAnalysisOptions = {},
+  imageBase64: string,
+  options: ImageAnalysisOptions = {}
 ): Promise<ImageAnalysis> {
-	return NativeAIToolkit.analyzeImage(imageBase64, options);
+  return NativeAIToolkit.analyzeImage(imageBase64, options);
 }
 
 export function scanBarcodes(imageBase64: string): Promise<Barcode[]> {
-	return NativeAIToolkit.scanBarcodes(imageBase64);
+  return NativeAIToolkit.scanBarcodes(imageBase64);
 }
 
 export function labelImage(imageBase64: string): Promise<ImageLabel[]> {
-	return NativeAIToolkit.labelImage(imageBase64);
+  return NativeAIToolkit.labelImage(imageBase64);
 }
 
 export function describeImage(imageBase64: string): Promise<string> {
-	return NativeAIToolkit.describeImage(imageBase64);
+  return NativeAIToolkit.describeImage(imageBase64);
 }
 
-export function segmentPerson(
-	imageBase64: string,
-): Promise<PersonSegmentationResult> {
-	return NativeAIToolkit.segmentPerson(imageBase64);
+export function segmentPerson(imageBase64: string): Promise<PersonSegmentationResult> {
+  return NativeAIToolkit.segmentPerson(imageBase64);
 }
 
 export function proofreadText(text: string): Promise<ProofreadResult> {
-	return NativeAIToolkit.proofreadText(text);
+  return NativeAIToolkit.proofreadText(text);
 }
 
-export type SummaryFormat = "one-bullet" | "bullets" | "headline";
+export type SummaryFormat = 'one-bullet' | 'bullets' | 'headline';
 
-export function summarizeText(
-	text: string,
-	format: SummaryFormat = "bullets",
-): Promise<string> {
-	return NativeAIToolkit.summarizeText(text, format);
+export function summarizeText(text: string, format: SummaryFormat = 'bullets'): Promise<string> {
+  return NativeAIToolkit.summarizeText(text, format);
 }
 
 export type RewriteStyle =
-	| "rephrase"
-	| "professional"
-	| "friendly"
-	| "casual"
-	| "concise"
-	| "creative"
-	| "elaborate";
+  | 'rephrase'
+  | 'professional'
+  | 'friendly'
+  | 'casual'
+  | 'concise'
+  | 'creative'
+  | 'elaborate';
 
-export function rewriteText(
-	text: string,
-	style: RewriteStyle,
-): Promise<string> {
-	return NativeAIToolkit.rewriteText(text, style);
+export function rewriteText(text: string, style: RewriteStyle): Promise<string> {
+  return NativeAIToolkit.rewriteText(text, style);
 }
 
-export function generateText(
-	prompt: string,
-	options: GenerationOptions = {},
-): Promise<string> {
-	return NativeAIToolkit.generateText(prompt, options);
+export function generateText(prompt: string, options: GenerationOptions = {}): Promise<string> {
+  return NativeAIToolkit.generateText(prompt, options);
 }
 
 export function smartReplies(messages: SmartReplyMessage[]): Promise<string[]> {
-	return NativeAIToolkit.smartReplies(messages);
+  return NativeAIToolkit.smartReplies(messages);
 }
 
 export function translateText(
-	text: string,
-	sourceLang: string,
-	targetLang: string,
+  text: string,
+  sourceLang: string,
+  targetLang: string
 ): Promise<string> {
-	return NativeAIToolkit.translateText(text, sourceLang, targetLang);
+  return NativeAIToolkit.translateText(text, sourceLang, targetLang);
 }
 
 export function transcribeAudioFile(
-	filePath: string,
-	options: TranscriptionOptions = {},
+  filePath: string,
+  options: TranscriptionOptions = {}
 ): Promise<Transcript> {
-	return NativeAIToolkit.transcribeAudioFile(filePath, options);
+  return NativeAIToolkit.transcribeAudioFile(filePath, options);
 }
 
 export function enablePrivateMode(enabled: boolean): void {
-	NativeAIToolkit.enablePrivateMode(enabled);
+  NativeAIToolkit.enablePrivateMode(enabled);
 }
 
 export function isPrivateModeEnabled(): boolean {
-	return NativeAIToolkit.isPrivateModeEnabled();
+  return NativeAIToolkit.isPrivateModeEnabled();
 }
