@@ -1,3 +1,4 @@
+// mobile-ai-toolkit — an OpenSLM project. https://github.com/openslm-ai
 #import "AIToolkitTurboModule.h"
 #import <Vision/Vision.h>
 #import <NaturalLanguage/NaturalLanguage.h>

@@ -1,3 +1,5 @@
+// mobile-ai-toolkit — an OpenSLM project. https://github.com/openslm-ai
+//
 // Apple Foundation Models bridge for mobile-ai-toolkit.
 // Requires iOS 26+ on Apple-Intelligence-capable hardware (A17 Pro, M-series).
 // On older OS or unsupported hardware the Objective-C++ caller must guard with

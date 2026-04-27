@@ -1,5 +1,7 @@
 # @anivar/mobile-ai-toolkit
 
+[![an OpenSLM project](https://img.shields.io/badge/an%20OpenSLM-project-0b1118?style=flat-square&labelColor=0b1118)](https://github.com/openslm-ai)
+
 > **On-device AI for React Native.** One unified TypeScript API; each method is a thin TurboModule binding to a documented platform framework — Apple Foundation Models / Vision / NaturalLanguage / Speech on iOS, Google ML Kit (incl. ML Kit GenAI on AICore-enabled devices) on Android. Nothing leaves the device, nothing is mocked.
 
 <p>
@@ -235,6 +237,12 @@ We also welcome:
 - The package has zero runtime dependencies. `peerDependencies` are `react ≥19` and `react-native ≥0.80`.
 - Releases are tagged on GitHub and built by the [release workflow](.github/workflows/release.yml) — the workflow file is the single source of truth for what gets published.
 
+## About OpenSLM
+
+`mobile-ai-toolkit` is part of [OpenSLM](https://github.com/openslm-ai) — an open
+collection of on-device small-language-model and AI runtime tooling. If you find
+this useful, the [OpenSLM org](https://github.com/openslm-ai) has more.
+
 ## License
 
-MIT © [Anivar Aravind](https://github.com/anivar)
+MIT © [Anivar Aravind](https://github.com/anivar) / [OpenSLM](https://github.com/openslm-ai)

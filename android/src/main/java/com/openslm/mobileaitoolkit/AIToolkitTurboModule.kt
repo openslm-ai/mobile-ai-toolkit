@@ -1,3 +1,4 @@
+// mobile-ai-toolkit — an OpenSLM project. https://github.com/openslm-ai
 package com.openslm.mobileaitoolkit
 
 import android.graphics.BitmapFactory

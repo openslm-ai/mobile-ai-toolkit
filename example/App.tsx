@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -10,77 +10,113 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { AI } from '@anivar/mobile-ai-toolkit';
-
-// Initialize AI on app start
-AI.configure({
-  preferOnDevice: true,
-  enablePrivateMode: false,
-  cacheEnabled: true,
-});
+import {
+  getDeviceCapabilities,
+  analyzeText,
+  smartReplies,
+  chat,
+  enablePrivateMode,
+  type DeviceCapabilities,
+} from '@anivar/mobile-ai-toolkit';
 
 export default function App() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities | null>(null);
 
-  const analyzeText = async () => {
+  useEffect(() => {
+    enablePrivateMode(false);
+    getDeviceCapabilities()
+      .then(setCapabilities)
+      .catch((err: Error) => Alert.alert('Capabilities error', err.message));
+  }, []);
+
+  const runSentiment = async () => {
     if (!input.trim()) {
       Alert.alert('Error', 'Please enter some text');
       return;
     }
-
     setLoading(true);
     try {
-      const analysis = await AI.analyze(input);
-      setResult(`
-Sentiment: ${analysis.sentiment > 0 ? '😊 Positive' : analysis.sentiment < 0 ? '😔 Negative' : '😐 Neutral'}
-Score: ${analysis.sentiment.toFixed(2)}
-Language: ${analysis.language}
-Processing: ${analysis.wasOnDevice ? '📱 On-device (FREE)' : '☁️ Cloud'}
-      `.trim());
+      const analysis = await analyzeText(input);
+      const sentimentLine =
+        typeof analysis.sentiment === 'number'
+          ? `Sentiment score: ${analysis.sentiment.toFixed(2)}`
+          : 'Sentiment: not provided by device';
+      setResult(
+        [
+          sentimentLine,
+          `Language: ${analysis.language || 'unknown'}`,
+          analysis.entities && analysis.entities.length > 0
+            ? `Entities: ${analysis.entities.map((e) => e.text).join(', ')}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      );
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', (error as Error).message);
     }
     setLoading(false);
   };
 
-  const generateSmartReply = async () => {
+  const runSmartReply = async () => {
+    if (!input.trim()) {
+      Alert.alert('Error', 'Please enter a message to reply to');
+      return;
+    }
     setLoading(true);
     try {
-      const replies = await AI.smartReply(input);
-      setResult('Smart Replies:\n' + replies.map((r, i) => `${i + 1}. ${r}`).join('\n'));
+      const replies = await smartReplies([
+        { text: input, fromUser: true, timestampMs: Date.now() },
+      ]);
+      setResult(
+        replies.length === 0
+          ? 'No smart replies returned.'
+          : 'Smart Replies:\n' + replies.map((r, i) => `${i + 1}. ${r}`).join('\n'),
+      );
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', (error as Error).message);
     }
     setLoading(false);
   };
 
-  const chatWithAI = async () => {
+  const runChat = async () => {
+    if (!input.trim()) {
+      Alert.alert('Error', 'Please enter a prompt');
+      return;
+    }
     setLoading(true);
     try {
-      const response = await AI.chat(input);
-      setResult(`AI Response:\n${response.message}\n\n${response.fromDevice ? '📱 Processed on-device' : '☁️ Processed in cloud'}`);
+      const response = await chat([{ role: 'user', content: input }]);
+      setResult(response);
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', (error as Error).message);
     }
     setLoading(false);
   };
 
-  const checkCapabilities = async () => {
-    try {
-      await AI.initialize();
-      const caps = AI.getCapabilities();
-      setResult(`Device Capabilities:
-✅ On-device AI: ${caps.hasOnDeviceAI ? 'Yes' : 'No'}
-✅ Models: ${caps.models?.join(', ') || 'None'}
-✅ Text Analysis: ${caps.features?.textAnalysis ? 'Yes' : 'No'}
-✅ Vision: ${caps.features?.vision ? 'Yes' : 'No'}
-✅ Speech: ${caps.features?.speech ? 'Yes' : 'No'}
-      `.trim());
-    } catch (error) {
-      Alert.alert('Error', error.message);
-    }
+  const renderCapabilities = () => {
+    if (!capabilities) return null;
+    const onDevice =
+      capabilities.hasAppleIntelligence ||
+      capabilities.hasGeminiNano ||
+      capabilities.hasMLKitGenAI;
+    return (
+      <View style={styles.capsBox}>
+        <Text style={styles.capsTitle}>Device capabilities</Text>
+        <Text style={styles.capsLine}>
+          {capabilities.platform} {capabilities.osVersion}
+          {capabilities.hasNeuralEngine ? ' - neural engine' : ''}
+        </Text>
+        <Text style={styles.capsLine}>On-device GenAI: {onDevice ? 'yes' : 'no'}</Text>
+        <Text style={styles.capsLine}>Chat: {capabilities.features.chat ? 'yes' : 'no'}</Text>
+        <Text style={styles.capsLine}>
+          Smart replies: {capabilities.features.smartReplies ? 'yes' : 'no'}
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -88,8 +124,10 @@ Processing: ${analysis.wasOnDevice ? '📱 On-device (FREE)' : '☁️ Cloud'}
       <ScrollView contentInsetAdjustmentBehavior="automatic">
         <View style={styles.header}>
           <Text style={styles.title}>Mobile AI Toolkit Demo</Text>
-          <Text style={styles.subtitle}>On-device AI • Zero Cloud Costs</Text>
+          <Text style={styles.subtitle}>On-device AI - Zero Cloud Costs</Text>
         </View>
+
+        {renderCapabilities()}
 
         <View style={styles.inputContainer}>
           <TextInput
@@ -105,30 +143,23 @@ Processing: ${analysis.wasOnDevice ? '📱 On-device (FREE)' : '☁️ Cloud'}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}
-            onPress={analyzeText}
+            onPress={runSentiment}
             disabled={loading}>
             <Text style={styles.buttonText}>Analyze Sentiment</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
-            onPress={generateSmartReply}
+            onPress={runSmartReply}
             disabled={loading}>
             <Text style={styles.buttonText}>Smart Reply</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
-            onPress={chatWithAI}
+            onPress={runChat}
             disabled={loading}>
-            <Text style={styles.buttonText}>Chat with AI</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.infoButton]}
-            onPress={checkCapabilities}
-            disabled={loading}>
-            <Text style={styles.buttonText}>Check Capabilities</Text>
+            <Text style={styles.buttonText}>Chat</Text>
           </TouchableOpacity>
         </View>
 
@@ -145,43 +176,25 @@ Processing: ${analysis.wasOnDevice ? '📱 On-device (FREE)' : '☁️ Cloud'}
             <Text style={styles.resultText}>{result}</Text>
           </View>
         )}
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            💡 Most features run on-device for FREE!
-          </Text>
-          <Text style={styles.footerText}>
-            🔒 Your data stays private on your device
-          </Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  header: { padding: 20, backgroundColor: '#007AFF', alignItems: 'center' },
+  title: { fontSize: 24, fontWeight: 'bold', color: 'white', marginBottom: 5 },
+  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.9)' },
+  capsBox: {
+    margin: 20,
+    padding: 12,
+    backgroundColor: 'white',
+    borderRadius: 8,
   },
-  header: {
-    padding: 20,
-    backgroundColor: '#007AFF',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-  },
-  inputContainer: {
-    padding: 20,
-  },
+  capsTitle: { fontWeight: '600', marginBottom: 4 },
+  capsLine: { fontSize: 12, color: '#666' },
+  inputContainer: { padding: 20 },
   input: {
     backgroundColor: 'white',
     borderRadius: 10,
@@ -189,77 +202,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 100,
     textAlignVertical: 'top',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 5,
   },
-  buttonContainer: {
-    paddingHorizontal: 20,
-  },
-  button: {
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  primaryButton: {
-    backgroundColor: '#007AFF',
-  },
-  secondaryButton: {
-    backgroundColor: '#5856D6',
-  },
-  infoButton: {
-    backgroundColor: '#34C759',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loadingContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    color: '#666',
-  },
+  buttonContainer: { paddingHorizontal: 20 },
+  button: { padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10 },
+  primaryButton: { backgroundColor: '#007AFF' },
+  secondaryButton: { backgroundColor: '#5856D6' },
+  buttonText: { color: 'white', fontSize: 16, fontWeight: '600' },
+  loadingContainer: { padding: 20, alignItems: 'center' },
+  loadingText: { marginTop: 10, color: '#666' },
   resultContainer: {
     margin: 20,
     padding: 15,
     backgroundColor: 'white',
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
   },
-  resultTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-  },
-  resultText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 22,
-  },
-  footer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 5,
-  },
+  resultTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: '#333' },
+  resultText: { fontSize: 14, color: '#666', lineHeight: 22 },
 });
