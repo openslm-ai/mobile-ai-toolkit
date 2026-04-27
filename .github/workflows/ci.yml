@@ -22,6 +22,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Typecheck library
+        run: npm run typecheck
+
+      - name: Typecheck example
+        run: npm run typecheck:example
+
       - name: Test
         run: npm test -- --ci
 

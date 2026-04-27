@@ -7,8 +7,9 @@
     "paths": {
       "@anivar/mobile-ai-toolkit": ["../src/index"]
     },
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "types": ["react-native", "@types/react"]
   },
-  "include": ["./**/*", "../src/**/*"],
+  "include": ["./src/**/*", "../src/**/*"],
   "exclude": ["node_modules", "../src/__tests__"]
 }

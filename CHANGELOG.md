@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-rc.4] - 2026-04-27
+
+### Added
+- Real RN scaffolding under `example/`: `package.json`, `metro.config.js` (with workspace resolver against the parent package), `babel.config.js`, `index.js`, `app.json`. `App.tsx` lives at `example/src/App.tsx`.
+- Root `typecheck` / `typecheck:example` scripts and a CI step that type-checks the example against the library source. The library typecheck is now part of CI on every push and PR.
+
+### Fixed
+- Android: removed the dangling `manifest.srcFile "src/main/AndroidManifestNew.xml"` override (the file did not exist; consumers on AGP 7.3+ would have hit a missing-manifest error). The namespace is still declared via `android.namespace`, and the package attribute on `AndroidManifest.xml` is dropped to avoid the AGP 7+ namespace/package conflict.
+
 ## [2.1.0-rc.3] - 2026-04-27
 
 ### Added

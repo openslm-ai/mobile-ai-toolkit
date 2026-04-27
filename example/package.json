@@ -1,0 +1,23 @@
+{
+  "name": "@anivar/mobile-ai-toolkit-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-native": "^0.80.0",
+    "@anivar/mobile-ai-toolkit": "file:.."
+  },
+  "devDependencies": {
+    "@react-native/babel-preset": "^0.80.0",
+    "@react-native/metro-config": "^0.80.0",
+    "@react-native/typescript-config": "^0.80.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^6.0.3"
+  }
+}

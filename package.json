@@ -1,6 +1,6 @@
 {
   "name": "@anivar/mobile-ai-toolkit",
-  "version": "2.1.0-rc.3",
+  "version": "2.1.0-rc.4",
   "description": "On-device AI for React Native. Zero cloud costs. One unified API.",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -28,6 +28,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "typecheck:example": "tsc --noEmit -p example/tsconfig.json",
     "lint": "biome check src/",
     "lint:fix": "biome check --write src/",
     "format": "biome format --write src/",

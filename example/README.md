@@ -1,52 +1,30 @@
-# Mobile AI Toolkit Example App
+# Mobile AI Toolkit Example
 
-This example demonstrates all features of the Mobile AI Toolkit.
+Demonstrates the on-device AI surface in `@anivar/mobile-ai-toolkit`:
 
-## Quick Start
+- **Sentiment analysis** — `analyzeText()` (on-device via NaturalLanguage / ML Kit)
+- **Smart replies** — `smartReplies()` (on-device via ML Kit Smart Reply)
+- **Chat** — `chat()` (Apple Foundation Models on iOS 26+, ML Kit GenAI on Pixel 9+, otherwise rejects)
+- **Capabilities probe** — `getDeviceCapabilities()`
+
+Source lives under [`src/App.tsx`](./src/App.tsx).
+
+## Run it
+
+This package is a code reference, wired up to consume the parent library via `file:..`. To run on a device:
 
 ```bash
-# Clone the repo
-git clone https://github.com/openslm-ai/mobile-ai-toolkit
-cd mobile-ai-toolkit/example
-
-# Install dependencies
+cd example
 npm install
-
-# iOS
-cd ios && pod install
-npx react-native run-ios
-
-# Android
-npx react-native run-android
+npx react-native start
+# in another shell
+npx react-native run-android   # or run-ios
 ```
 
-## Features Demonstrated
+iOS additionally needs a one-off pod install before first run:
 
-- **Text Sentiment Analysis** - Analyze emotions in text (on-device)
-- **Smart Reply** - Generate contextual responses (on-device)
-- **AI Chat** - Have conversations with AI (hybrid)
-- **Device Capabilities** - Check what AI features are available
+```bash
+cd ios && pod install
+```
 
-## Screenshots
-
-The app shows:
-1. Text input field
-2. Multiple AI action buttons
-3. Real-time results display
-4. On-device vs cloud processing indicator
-5. Device capabilities checker
-
-## Key Points
-
-- Most features run **completely free** on-device
-- No API keys needed for basic features
-- Works offline
-- Privacy-first approach
-
-## Customization
-
-Edit `App.tsx` to:
-- Add your proxy URL for cloud features
-- Customize the UI
-- Add more AI features
-- Integrate with your backend
+The example is a standard React Native 0.80 / React 19 project. Native folders (`ios/`, `android/`) are not committed — generate them via `npx @react-native-community/cli init` if you want a runnable host, then drop `src/App.tsx` and the existing `index.js` / `app.json` over the generated entries.

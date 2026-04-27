@@ -50,12 +50,6 @@ def supportsNamespace() {
 android {
   if (supportsNamespace()) {
     namespace "com.openslm.mobileaitoolkit"
-
-    sourceSets {
-      main {
-        manifest.srcFile "src/main/AndroidManifestNew.xml"
-      }
-    }
   }
 
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
