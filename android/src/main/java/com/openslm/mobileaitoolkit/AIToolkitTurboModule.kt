@@ -1,11 +1,7 @@
 package com.openslm.mobileaitoolkit
 
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
-import android.os.Bundle
-import android.speech.RecognitionListener
-import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Base64
 import com.facebook.react.bridge.Arguments
@@ -473,66 +469,17 @@ class AIToolkitTurboModule(private val reactContext: ReactApplicationContext) :
     // ---- Speech ----
 
     override fun transcribeAudioFile(filePath: String, options: ReadableMap, promise: Promise) {
-        if (!SpeechRecognizer.isRecognitionAvailable(reactContext)) {
-            promise.reject("SPEECH_UNAVAILABLE", "SpeechRecognizer is not available on this device")
-            return
-        }
-        val locale = options.takeIf { it.hasKey("locale") }?.getString("locale") ?: "en-US"
-        val mainHandler = android.os.Handler(reactContext.mainLooper)
-        mainHandler.post {
-            val recognizer = SpeechRecognizer.createSpeechRecognizer(reactContext)
-            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale)
-                putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
-                putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, android.media.MediaRecorder.AudioSource.DEFAULT)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    putExtra("android.speech.extra.ENABLE_FORMATTING", "quality")
-                }
-            }
-            var resolved = false
-            recognizer.setRecognitionListener(object : RecognitionListener {
-                override fun onReadyForSpeech(p0: Bundle?) {}
-                override fun onBeginningOfSpeech() {}
-                override fun onRmsChanged(p0: Float) {}
-                override fun onBufferReceived(p0: ByteArray?) {}
-                override fun onEndOfSpeech() {}
-                override fun onError(error: Int) {
-                    if (resolved) return
-                    resolved = true
-                    promise.reject("SPEECH_ERROR", "SpeechRecognizer error code $error")
-                    recognizer.destroy()
-                }
-                override fun onResults(results: Bundle?) {
-                    if (resolved) return
-                    resolved = true
-                    val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    val scores = results?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
-                    val text = matches?.firstOrNull() ?: ""
-                    val confidence = scores?.firstOrNull()?.toDouble() ?: 0.0
-                    val out = Arguments.createMap().apply {
-                        putString("text", text)
-                        putDouble("confidence", confidence)
-                        putString("locale", locale)
-                    }
-                    promise.resolve(out)
-                    recognizer.destroy()
-                }
-                override fun onPartialResults(p0: Bundle?) {}
-                override fun onEvent(p0: Int, p1: Bundle?) {}
-            })
-            try {
-                // Note: SpeechRecognizer microphone-only by default. File transcription requires
-                // EXTRA_AUDIO_SOURCE_CHANNEL_COUNT and similar on API 33+, but is OEM-dependent.
-                // For now this method captures from microphone if no file source is wired up by OEM.
-                recognizer.startListening(intent)
-            } catch (e: Exception) {
-                if (!resolved) {
-                    resolved = true
-                    promise.reject("SPEECH_START_ERROR", e.message, e)
-                }
-            }
-        }
+        // Android's SpeechRecognizer is microphone-only on stock platforms; the
+        // EXTRA_AUDIO_SOURCE path for file input is OEM-gated and not reliably
+        // available across devices. Reject explicitly so callers can fall back
+        // to a TFLite/whisper-on-device pipeline rather than silently
+        // transcribing the live microphone (which the previous implementation
+        // did, contradicting the filePath contract).
+        promise.reject(
+            "FILE_TRANSCRIPTION_UNSUPPORTED",
+            "Android does not expose a stable file-based SpeechRecognizer API. " +
+                "Use startTranscription() for live capture, or wire a TFLite ASR model."
+        )
     }
 
     // ---- Embeddings ----

@@ -760,10 +760,9 @@ RCT_EXPORT_METHOD(enablePrivateMode:(BOOL)enabled)
     privateMode = enabled;
 }
 
-RCT_EXPORT_METHOD(isPrivateModeEnabled:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isPrivateModeEnabled)
 {
-    resolve(@(privateMode));
+    return @(privateMode);
 }
 
 @end

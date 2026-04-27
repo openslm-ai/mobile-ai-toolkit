@@ -51,9 +51,11 @@ Pod::Spec.new do |s|
   ]
 
   # iOS 18.1+ Apple Intelligence (optional)
+  # FoundationModels is iOS 26+; weak-link so older iOS still loads the dylib.
   s.weak_frameworks = [
-    "WritingTools", # iOS 18.1+
-    "AppIntents"    # iOS 18.1+
+    "WritingTools",      # iOS 18.1+
+    "AppIntents",        # iOS 18.1+
+    "FoundationModels"   # iOS 26+
   ]
 
   s.dependency "React"
