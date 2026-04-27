@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
 import {
+  analyzeText,
+  chat,
+  type DeviceCapabilities,
+  enablePrivateMode,
+  getDeviceCapabilities,
+  smartReplies,
+} from '@anivar/mobile-ai-toolkit';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
   SafeAreaView,
   ScrollView,
-  View,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
+  View,
 } from 'react-native';
-import {
-  getDeviceCapabilities,
-  analyzeText,
-  smartReplies,
-  chat,
-  enablePrivateMode,
-  type DeviceCapabilities,
-} from '@anivar/mobile-ai-toolkit';
 
 export default function App() {
   const [input, setInput] = useState('');
@@ -53,7 +53,7 @@ export default function App() {
             : null,
         ]
           .filter(Boolean)
-          .join('\n'),
+          .join('\n')
       );
     } catch (error) {
       Alert.alert('Error', (error as Error).message);
@@ -74,7 +74,7 @@ export default function App() {
       setResult(
         replies.length === 0
           ? 'No smart replies returned.'
-          : 'Smart Replies:\n' + replies.map((r, i) => `${i + 1}. ${r}`).join('\n'),
+          : `Smart Replies:\n${replies.map((r, i) => `${i + 1}. ${r}`).join('\n')}`
       );
     } catch (error) {
       Alert.alert('Error', (error as Error).message);
@@ -100,9 +100,7 @@ export default function App() {
   const renderCapabilities = () => {
     if (!capabilities) return null;
     const onDevice =
-      capabilities.hasAppleIntelligence ||
-      capabilities.hasGeminiNano ||
-      capabilities.hasMLKitGenAI;
+      capabilities.hasAppleIntelligence || capabilities.hasGeminiNano || capabilities.hasMLKitGenAI;
     return (
       <View style={styles.capsBox}>
         <Text style={styles.capsTitle}>Device capabilities</Text>
@@ -144,21 +142,24 @@ export default function App() {
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}
             onPress={runSentiment}
-            disabled={loading}>
+            disabled={loading}
+          >
             <Text style={styles.buttonText}>Analyze Sentiment</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
             onPress={runSmartReply}
-            disabled={loading}>
+            disabled={loading}
+          >
             <Text style={styles.buttonText}>Smart Reply</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
             onPress={runChat}
-            disabled={loading}>
+            disabled={loading}
+          >
             <Text style={styles.buttonText}>Chat</Text>
           </TouchableOpacity>
         </View>

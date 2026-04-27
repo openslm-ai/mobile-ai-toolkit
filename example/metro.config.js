@@ -13,9 +13,7 @@ const extraNodeModules = peers.reduce((acc, name) => {
 const config = {
   watchFolders: [root],
   resolver: {
-    blockList: peers.map(
-      (name) => new RegExp(`^${path.join(root, 'node_modules', name)}\\/.*$`),
-    ),
+    blockList: peers.map((name) => new RegExp(`^${path.join(root, 'node_modules', name)}\\/.*$`)),
     extraNodeModules,
   },
 };
